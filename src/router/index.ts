@@ -1,0 +1,55 @@
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import MainLayout from '@/layouts/MainLayout.vue'
+
+const routes: Array<RouteRecordRaw> = [
+  {
+    path: '/',
+    component: MainLayout,
+    redirect: '/stock/balance',
+    children: [
+      {
+        path: '/stock/balance',
+        name: 'Balance',
+        component: () => import('@/views/stock/BalanceView.vue'),
+        meta: { title: 'Баланс', icon: 'pi pi-box' }
+      },
+      {
+        path: '/stock/receipts',
+        name: 'Receipts',
+        component: () => import('@/views/stock/ReceiptsView.vue'),
+        meta: { title: 'Поступления', icon: 'pi pi-arrow-down' }
+      },
+      {
+        path: '/stock/shipments',
+        name: 'Shipments',
+        component: () => import('@/views/stock/ShipmentsView.vue'),
+        meta: { title: 'Отгрузки', icon: 'pi pi-arrow-up' }
+      },
+      {
+        path: '/references/clients',
+        name: 'Clients',
+        component: () => import('@/views/refs/ClientsView.vue'),
+        meta: { title: 'Клиенты', icon: 'pi pi-users' }
+      },
+      {
+        path: '/references/units',
+        name: 'Units',
+        component: () => import('@/views/refs/UnitsView.vue'),
+        meta: { title: 'Единицы измерения', icon: 'pi pi-ruler' }
+      },
+      {
+        path: '/references/resources',
+        name: 'Resources',
+        component: () => import('@/views/refs/ResourcesView.vue'),
+        meta: { title: 'Ресурсы', icon: 'pi pi-tags' }
+      }
+    ]
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+})
+
+export default router

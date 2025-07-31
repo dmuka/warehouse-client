@@ -1,11 +1,13 @@
 <template>
-  <router-view />
+  <div>
+    <h1>Отгрузки</h1>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'App'
+  name: 'ShipmentsView'
 })
 </script>
