@@ -1,23 +1,24 @@
 <template>
   <div class="resources-view">
     <div class="page-header">
-      <h1>Ресурсы</h1>
+      <h1>{{ showArchive ? 'Архив ресурсов' : 'Ресурсы' }}</h1>
       <div class="header-buttons">
         <Button
+          v-if="!showArchive"
           label="Добавить"
           icon="pi pi-plus"
           @click="navigateToAdd"
         />
         <Button
-          label="К архиву"
-          icon="pi pi-archive"
-          @click="navigateToArchive"
+          :label="showArchive ? 'К активным' : 'К архиву'"
+          :icon="showArchive ? 'pi pi-archive' : 'pi pi-tags'"
+          @click="toggleArchive"
         />
       </div>
     </div>
 
     <DataTable
-      :value="activeResources"
+      :value="filteredResources"
       stripedRows
       selectionMode="single"
       @rowSelect="navigateToEdit"
@@ -29,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted } from 'vue'
+import { defineComponent, computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useResourcesStore } from '@/stores/resources'
 import Button from 'primevue/button'
@@ -46,20 +47,20 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const resourcesStore = useResourcesStore()
+    const showArchive = ref(false)
 
     onMounted(() => {
       resourcesStore.fetchResources()
     })
 
-    const activeResources = computed(() => {
-      return resourcesStore.resources.filter(r => r.isActive)
+    const filteredResources = computed(() => {
+      return resourcesStore.resources.filter(r => r.isActive !== showArchive.value)
     })
 
     const navigateToEdit = (event: any) => {
       const resource = event.data
       router.push({
-        path: `/references/resources/edit/${resource.id.value}`,
-        query: { name: resource.resourceName.value }
+        path: `/references/resources/edit/${resource.id.value}`
       })
     }
 
@@ -67,15 +68,16 @@ export default defineComponent({
       router.push('/references/resources/add')
     }
 
-    const navigateToArchive = () => {
-      router.push('/references/resources/archive')
+    const toggleArchive = () => {
+      showArchive.value = !showArchive.value
     }
 
     return {
-      activeResources,
+      filteredResources,
+      showArchive,
       navigateToEdit,
       navigateToAdd,
-      navigateToArchive
+      toggleArchive
     }
   }
 })

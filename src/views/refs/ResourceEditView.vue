@@ -3,29 +3,12 @@
     <Card>
       <template #title>
         <div class="page-header">
-            <h1>Ресурс</h1>
-            <div class="header-buttons">
-                <Button
-                    type="submit"
-                    label="Сохранить"
-                    class="p-button-sm"
-                    @click="handleSubmit"
-                />
-                <Button
-                    type="button"
-                    label="Удалить"
-                    severity="danger"
-                    class="p-button-sm"
-                    @click="archiveResource"
-                />
-                <Button
-                    type="button"
-                    label="В архив"
-                    severity="secondary"
-                    class="p-button-sm"
-                    @click="navigateBack"
-                />
-            </div>
+          <h1>Ресурс</h1>
+          <div class="header-buttons">
+            <Button type="submit" label="Сохранить" class="p-button-sm" @click="handleSubmit" />
+            <Button type="button" label="Удалить" severity="danger" class="p-button-sm" @click="archiveResource" />
+            <Button type="button" label="В архив" severity="secondary" class="p-button-sm" @click="navigateBack" />
+          </div>
         </div>
       </template>
       <template #content>
@@ -74,11 +57,18 @@ export default defineComponent({
       }
     })
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
       if (isEditMode.value && id) {
-        resourcesStore.updateResource(id, form)
+        await resourcesStore.updateResource({
+          id: id,
+          resourceName: form.name,
+          isActive: true
+        })
       } else {
-        resourcesStore.addResource({ ...form, isActive: true })
+        await resourcesStore.addResource({
+          resourceName: form.name,
+          isActive: true
+        })
       }
       navigateBack()
     }

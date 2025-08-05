@@ -43,11 +43,15 @@ export const useResourcesStore = defineStore("resources", {
         throw error;
       }
     },
-    addResource(resource: any) {
-      this.resources.push(resource);
+    async addResource(resource: any) {
+      await fetch(`${RESOURCES_ENDPOINT}`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(resource)
+       })
     },
-    async updateResource(id: string, updated: any) {
-      await fetch(`${RESOURCE_UPDATE_ENDPOINT}/${id}`, {
+    async updateResource(updated: any) {
+      await fetch(`${RESOURCE_UPDATE_ENDPOINT}`, {
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify(updated)
