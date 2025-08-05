@@ -7,6 +7,7 @@ const routes: Array<RouteRecordRaw> = [
     component: MainLayout,
     redirect: '/stock/balance',
     children: [
+      // Stock routes
       {
         path: '/stock/balance',
         name: 'Balance',
@@ -25,6 +26,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/stock/ShipmentsView.vue'),
         meta: { title: 'Отгрузки', icon: 'pi pi-arrow-up' }
       },
+      // Reference routes
       {
         path: '/references/clients',
         name: 'Clients',
@@ -37,11 +39,31 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/refs/UnitsView.vue'),
         meta: { title: 'Единицы измерения', icon: 'pi pi-ruler' }
       },
-      {
+      // Resources routes
+     {
         path: '/references/resources',
         name: 'Resources',
         component: () => import('@/views/refs/ResourcesView.vue'),
         meta: { title: 'Ресурсы', icon: 'pi pi-tags' }
+      },
+      {
+        path: '/references/resources/add',
+        name: 'AddResource',
+        component: () => import('@/views/refs/ResourceEditView.vue'),
+        meta: {
+          title: 'Добавить ресурс',
+          hideInMenu: true // Mark this route as hidden
+        }
+      },
+      {
+        path: '/references/resources/edit/:id',
+        name: 'EditResource',
+        component: () => import('@/views/refs/ResourceEditView.vue'),
+        meta: {
+          title: 'Редактировать ресурс',
+          hideInMenu: true // Mark this route as hidden
+        },
+        props: true
       }
     ]
   }

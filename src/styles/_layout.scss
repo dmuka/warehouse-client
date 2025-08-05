@@ -1,0 +1,112 @@
+// src/styles/_layout.scss
+@use 'variables' as vars;
+@use 'mixins' as mix;
+
+@mixin app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+@mixin sidebar {
+  width: vars.$sidebar-width;
+  background-color: vars.$sidebar-bg;
+  color: vars.$text-light;
+  padding: vars.$base-padding 0;
+  flex-shrink: 0;
+}
+
+@mixin sidebar-header {
+  padding: 0 vars.$base-padding vars.$base-padding;
+  border-bottom: 1px solid vars.$border-color;
+
+  h2 {
+    margin: 0;
+    font-size: vars.$font-size-lg;
+  }
+}
+
+@mixin sidebar-nav {
+  padding: vars.$base-padding 0;
+}
+
+@mixin nav-section {
+  margin-bottom: vars.$section-margin;
+}
+
+@mixin section-title {
+  padding: 0 vars.$base-padding;
+  margin: 0 0 0.5rem;
+  font-size: vars.$font-size-sm;
+  font-weight: vars.$font-weight-medium;
+  text-transform: uppercase;
+  color: vars.$text-muted;
+}
+
+@mixin nav-list {
+  @include mix.list-reset;
+}
+
+@mixin nav-item {
+  list-style: none;
+}
+
+@mixin nav-link {
+  @include mix.flex-center;
+  padding: vars.$item-padding;
+  color: vars.$text-light;
+  text-decoration: none;
+  @include mix.transition(background-color);
+}
+
+@mixin nav-link-hover {
+  background-color: vars.$border-color;
+}
+
+@mixin nav-icon {
+  margin-right: 0.75rem;
+  font-size: vars.$font-size-base;
+}
+
+@mixin active-nav-link {
+  background-color: vars.$active-link-bg;
+  font-weight: vars.$font-weight-medium;
+}
+
+@mixin main-content {
+  flex: 1;
+  padding: vars.$section-margin;
+  background-color: vars.$main-content-bg;
+}
+
+@mixin fade-transition {
+  @include mix.transition(opacity);
+}
+
+@mixin fade-state {
+  opacity: 0;
+}.resources-view {
+  padding: 1rem;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.custom-table :deep(.p-datatable-thead > tr > th) {
+  background-color: #f0f0f0c5;
+  border: 1px solid #000000;
+  color: #333;
+}
+
+.custom-table :deep(.p-datatable-tbody > tr > td) {
+  border: 1px solid #000000;
+}

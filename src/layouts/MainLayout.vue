@@ -51,16 +51,22 @@ export default defineComponent({
   setup() {
     const router = useRouter()
 
-    const stockRoutes = computed(() => {
+    const visibleRoutes = computed(() => {
       return router.options.routes[0].children?.filter(
-        route => route.path?.startsWith('/stock')
+        route => !route.meta?.hideInMenu
       ) || []
     })
 
+    const stockRoutes = computed(() => {
+      return visibleRoutes.value.filter(route =>
+        route.path?.startsWith('/stock')
+      )
+    })
+
     const referenceRoutes = computed(() => {
-      return router.options.routes[0].children?.filter(
-        route => route.path?.startsWith('/references')
-      ) || []
+      return visibleRoutes.value.filter(route =>
+        route.path?.startsWith('/references')
+      )
     })
 
     return { stockRoutes, referenceRoutes }
@@ -69,5 +75,67 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/layout.scss' as layout;
+@use '@/styles/layout' as layout;
+
+.app-layout {
+  @include layout.app-layout;
+}
+
+.sidebar {
+  @include layout.sidebar;
+
+  &-header {
+    @include layout.sidebar-header;
+  }
+
+  &-nav {
+    @include layout.sidebar-nav;
+
+    .nav-section {
+      @include layout.nav-section;
+
+      .section-title {
+        @include layout.section-title;
+      }
+
+      ul {
+        @include layout.nav-list;
+
+        li {
+          @include layout.nav-item;
+
+          a {
+            @include layout.nav-link;
+
+            &:hover {
+              @include layout.nav-link-hover;
+            }
+
+            i {
+              @include layout.nav-icon;
+            }
+          }
+
+          .router-link-active {
+            @include layout.active-nav-link;
+          }
+        }
+      }
+    }
+  }
+}
+
+.main-content {
+  @include layout.main-content;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  @include layout.fade-transition;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  @include layout.fade-state;
+}
 </style>
