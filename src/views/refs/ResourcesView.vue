@@ -56,7 +56,11 @@ export default defineComponent({
     })
 
     const navigateToEdit = (event: any) => {
-      router.push(`/references/resources/edit/${event.data.id}`)
+      const resource = event.data
+      router.push({
+        path: `/references/resources/edit/${resource.id.value}`,
+        query: { name: resource.resourceName.value }
+      })
     }
 
     const navigateToAdd = () => {

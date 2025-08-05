@@ -4,7 +4,7 @@
       <template #title>
         <div class="page-header">
             <h1>Ресурс</h1>
-            <div class="title-actions">
+            <div class="header-buttons">
                 <Button
                     type="submit"
                     label="Сохранить"
@@ -61,19 +61,22 @@ export default defineComponent({
     })
 
     const isEditMode = computed(() => route.name === 'EditResource')
+    const id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id as string
 
-    onMounted(() => {
-      if (isEditMode.value && route.params.id) {
-        const resource = resourcesStore.getResourceById(route.params.id as string)
+    onMounted(async () => {
+      if (isEditMode.value && id) {
+        const resource = await resourcesStore.getResourceById(id)
         if (resource) {
-          form.name = resource.name
+          form.name = resource.resourceName?.value || ''
+        } else if (route.query.name) {
+          form.name = route.query.name as string
         }
       }
     })
 
     const handleSubmit = () => {
-      if (isEditMode.value && route.params.id) {
-        resourcesStore.updateResource(route.params.id as string, form)
+      if (isEditMode.value && id) {
+        resourcesStore.updateResource(id, form)
       } else {
         resourcesStore.addResource({ ...form, isActive: true })
       }
@@ -82,7 +85,7 @@ export default defineComponent({
 
     const archiveResource = () => {
       if (route.params.id) {
-        resourcesStore.archiveResource(route.params.id as string)
+        resourcesStore.archiveResource(Number(id))
         navigateBack()
       }
     }
@@ -95,27 +98,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-.resource-edit-view {
-  max-width: 600px;
-  margin: 1rem auto;
-}
-
-.title-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.field {
-  margin-top: 1.5rem;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-</style>
