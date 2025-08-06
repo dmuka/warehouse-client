@@ -34,10 +34,48 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Клиенты', icon: 'pi pi-users' }
       },
       {
+        path: '/references/clients/add',
+        name: 'AddClient',
+        component: () => import('@/views/refs/ClientEditView.vue'),
+        meta: {
+          title: 'Добавить клиента',
+          hideInMenu: true
+        }
+      },
+      {
+        path: '/references/clients/edit/:id',
+        name: 'EditClient',
+        component: () => import('@/views/refs/ClientEditView.vue'),
+        meta: {
+          title: 'Редактировать клиента',
+          hideInMenu: true
+        },
+        props: true
+      },
+      {
         path: '/references/units',
         name: 'Units',
         component: () => import('@/views/refs/UnitsView.vue'),
         meta: { title: 'Единицы измерения', icon: 'pi pi-ruler' }
+      },
+      {
+        path: '/references/units/add',
+        name: 'AddUnit',
+        component: () => import('@/views/refs/UnitEditView.vue'),
+        meta: {
+          title: 'Добавить единицу измерения',
+          hideInMenu: true
+        }
+      },
+      {
+        path: '/references/units/edit/:id',
+        name: 'EditUnit',
+        component: () => import('@/views/refs/UnitEditView.vue'),
+        meta: {
+          title: 'Редактировать единицу измерения',
+          hideInMenu: true
+        },
+        props: true
       },
       // Resources routes
      {
