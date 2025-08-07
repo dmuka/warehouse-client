@@ -22,7 +22,15 @@ export const CLIENT_UNARCHIVE_URL = `${CLIENTS_URL}/unarchive`
 // *** Stock ***
 // Balances
 export const BALANCES_URL = `${API_BASE_URL}/balances`
+export const BALANCE_UPDATE_URL = `${BALANCES_URL}/update`
+export const BALANCE_FILTER_URL = `${BALANCES_URL}/filter`
 // Receipts
 export const RECEIPTS_URL = `${API_BASE_URL}/receipts`
+export const RECEIPT_UPDATE_URL = `${RECEIPTS_URL}/update`
+export const RECEIPT_REMOVE_URL = `${RECEIPTS_URL}/delete`
+export const RECEIPT_FILTER_URL = `${RECEIPTS_URL}/filter`
 // Shipments
 export const SHIPMENTS_URL = `${API_BASE_URL}/shipments`
+export const SHIPMENT_UPDATE_URL = `${SHIPMENTS_URL}/update`
+export const SHIPMENT_REMOVE_URL = `${SHIPMENTS_URL}/delete`
+export const SHIPMENT_FILTER_URL = `${SHIPMENTS_URL}/filter`

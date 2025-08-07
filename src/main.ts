@@ -4,7 +4,9 @@ import '@/styles/_index.scss'
 import App from './App.vue'
 import router from './router'
 import PrimeVue from 'primevue/config'
-
+import 'primevue/resources/themes/saga-blue/theme.css';
+import 'primevue/resources/primevue.min.css';
+import 'primeicons/primeicons.css';
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'

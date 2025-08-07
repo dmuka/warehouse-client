@@ -11,7 +11,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/stock/balance',
         name: 'Balance',
-        component: () => import('@/views/stock/BalanceView.vue'),
+        component: () => import('@/views/stock/BalancesView.vue'),
         meta: { title: 'Баланс', icon: 'pi pi-box' }
       },
       {
@@ -56,7 +56,7 @@ const routes: Array<RouteRecordRaw> = [
         path: '/references/units',
         name: 'Units',
         component: () => import('@/views/refs/UnitsView.vue'),
-        meta: { title: 'Единицы измерения', icon: 'pi pi-ruler' }
+        meta: { title: 'Единицы измерения', icon: 'pi pi-gauge' }
       },
       {
         path: '/references/units/add',
