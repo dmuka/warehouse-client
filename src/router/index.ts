@@ -21,6 +21,15 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Поступления', icon: 'pi pi-arrow-down' }
       },
       {
+        path: '/stock/receipts/add',
+        name: 'AddReceipt',
+        component: () => import('@/views/stock/ReceiptCreateView.vue'),
+        meta: {
+          title: 'Добавить поступление', icon: 'pi pi-arrow-down',
+          hideInMenu: true
+        }
+      },
+      {
         path: '/stock/shipments',
         name: 'Shipments',
         component: () => import('@/views/stock/ShipmentsView.vue'),

@@ -1,19 +1,6 @@
 import { defineStore } from 'pinia'
+import { Receipt } from '@/types/receipts'
 import { RECEIPTS_URL, RECEIPT_UPDATE_URL, RECEIPT_REMOVE_URL } from '../api'
-
-export interface ReceiptItem {
-  receiptId: string
-  resourceId: string
-  unitId: string
-  quantity: number
-}
-
-export interface Receipt {
-  id: string
-  number: string
-  date: string
-  items: ReceiptItem[]
-}
 
 export const useReceiptsStore = defineStore("receipts", {
   state: () => ({

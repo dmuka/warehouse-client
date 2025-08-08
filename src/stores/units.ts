@@ -3,7 +3,7 @@ import { UNITS_URL, UNIT_UPDATE_URL, UNIT_REMOVE_URL, UNIT_ARCHIVE_URL, UNIT_UNA
 
 export const useUnitsStore = defineStore("units", {
   state: () => ({
-    units: [] as Array<{ id: number; name: string; isActive: boolean }>,
+    units: [] as Array<{ id: string; name: string; isActive: boolean }>,
   }),
   actions: {
     async fetchUnits() {
@@ -30,7 +30,7 @@ export const useUnitsStore = defineStore("units", {
 
         const data = await response.json();
 
-        const index = this.units.findIndex((u) => u.id === Number(id));
+        const index = this.units.findIndex((u) => u.id === id);
         if (index !== -1) {
           this.units[index] = data;
         } else {
@@ -61,7 +61,7 @@ export const useUnitsStore = defineStore("units", {
       await fetch(`${UNIT_ARCHIVE_URL}/${id}`, {
         method: "PATCH",
       });
-      const index = this.units.findIndex((u) => u.id === Number(id));
+      const index = this.units.findIndex((u) => u.id === id);
       if (index !== -1) {
         this.units[index].isActive = false;
       }
@@ -70,7 +70,7 @@ export const useUnitsStore = defineStore("units", {
       await fetch(`${UNIT_UNARCHIVE_URL}/${id}`, {
         method: "PATCH",
       });
-      const index = this.units.findIndex((u) => u.id === Number(id));
+      const index = this.units.findIndex((u) => u.id === id);
       if (index !== -1) {
         this.units[index].isActive = true;
       }

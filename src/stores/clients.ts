@@ -4,7 +4,7 @@ import { CLIENTS_URL, CLIENT_UPDATE_URL, CLIENT_REMOVE_URL, CLIENT_ARCHIVE_URL, 
 export const useClientsStore = defineStore("clients", {
   state: () => ({
     clients: [] as Array<{
-      id: number;
+      id: string;
       clientName: string;
       clientAddress: string;
       isActive: boolean;
@@ -35,7 +35,7 @@ export const useClientsStore = defineStore("clients", {
 
         const data = await response.json();
 
-        const index = this.clients.findIndex((r) => r.id === Number(id));
+        const index = this.clients.findIndex((r) => r.id === id);
         if (index !== -1) {
           this.clients[index] = data;
         } else {
@@ -66,7 +66,7 @@ export const useClientsStore = defineStore("clients", {
       await fetch(`${CLIENT_ARCHIVE_URL}/${id}`, {
         method: "PATCH",
       });
-      const index = this.clients.findIndex((r) => r.id === Number(id));
+      const index = this.clients.findIndex((r) => r.id === id);
       if (index !== -1) {
         this.clients[index].isActive = false;
       }
@@ -75,7 +75,7 @@ export const useClientsStore = defineStore("clients", {
       await fetch(`${CLIENT_UNARCHIVE_URL}/${id}`, {
         method: "PATCH",
       });
-      const index = this.clients.findIndex((u) => u.id === Number(id));
+      const index = this.clients.findIndex((u) => u.id === id);
       if (index !== -1) {
         this.clients[index].isActive = true;
       }

@@ -3,7 +3,7 @@ import { RESOURCES_URL, RESOURCE_UPDATE_URL, RESOURCE_REMOVE_URL, RESOURCE_ARCHI
 
 export const useResourcesStore = defineStore("resources", {
   state: () => ({
-    resources: [] as Array<{ id: number; name: string; isActive: boolean }>,
+    resources: [] as Array<{ id: string; name: string; isActive: boolean }>,
   }),
   actions: {
     async fetchResources() {
@@ -61,7 +61,7 @@ export const useResourcesStore = defineStore("resources", {
       await fetch(`${RESOURCE_ARCHIVE_URL}/${id}`, {
         method: "PATCH",
       });
-      const index = this.resources.findIndex((r) => r.id === Number(id));
+      const index = this.resources.findIndex((r) => r.id === id);
       if (index !== -1) {
         this.resources[index].isActive = false;
       }
@@ -70,7 +70,7 @@ export const useResourcesStore = defineStore("resources", {
       await fetch(`${RESOURCE_UNARCHIVE_URL}/${id}`, {
         method: "PATCH",
       });
-      const index = this.resources.findIndex((r) => r.id === Number(id));
+      const index = this.resources.findIndex((r) => r.id === id);
       if (index !== -1) {
         this.resources[index].isActive = true;
       }

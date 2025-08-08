@@ -4,47 +4,47 @@
       <h1>Баланс</h1>
     </div>
 
-      <div class="filters">
-    <div class="filter-group">
-      <MultiSelect
-        id="resourceFilter"
-        v-model="selectedResources"
-        :options="resourceOptions"
-        optionLabel="name"
-        optionValue="id"
-        display="chip"
-        filter
-        placeholder="Выберите ресурсы"
-        class="w-full md:w-80"
-      />
-    </div>
+    <div class="filters">
+      <div class="filter-group">
+        <MultiSelect
+          id="resourceFilter"
+          v-model="selectedResources"
+          :options="resourceOptions"
+          optionLabel="name"
+          optionValue="id"
+          display="chip"
+          filter
+          placeholder="Выберите ресурсы"
+          class="w-full md:w-80"
+        />
+      </div>
 
-    <div class="filter-group">
-      <MultiSelect
-        id="unitFilter"
-        v-model="selectedUnits"
-        :options="unitOptions"
-        optionLabel="name"
-        optionValue="id"
-        placeholder="Выберите единицы"
-        class="w-full md:w-80"
-        filter
-        display="chip"
-        panelClass="clean-panel"
-      />
+      <div class="filter-group">
+        <MultiSelect
+          id="unitFilter"
+          v-model="selectedUnits"
+          :options="unitOptions"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Выберите единицы"
+          class="w-full md:w-80"
+          filter
+          display="chip"
+          panelClass="clean-panel"
+        />
+      </div>
     </div>
-  </div>
 
     <DataTable :value="balances" stripedRows class="custom-table" :loading="loading" paginator :rows="10"
-      :rowsPerPageOptions="[5, 10, 20, 50]">
-      <Column field="resourceName" header="Ресурс" sortable></Column>
-      <Column field="unitName" header="Единица измерения" sortable></Column>
-      <Column field="quantity" header="Баланс" sortable>
-        <template #body="{ data }">
-          {{ formatNumber(data.quantity) }}
-        </template>
-      </Column>
-    </DataTable>
+        :rowsPerPageOptions="[5, 10, 20, 50]">
+        <Column field="resourceName" header="Ресурс" sortable></Column>
+        <Column field="unitName" header="Единица измерения" sortable></Column>
+        <Column field="quantity" header="Баланс" sortable>
+          <template #body="{ data }">
+            {{ formatNumber(data.quantity) }}
+          </template>
+        </Column>
+      </DataTable>
   </div>
 </template>
 
@@ -145,54 +145,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-.balance-view {
-  padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.filters {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  flex: 1;
-  min-width: 250px;
-}
-
-@media (max-width: 768px) {
-  .filters {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .filter-group {
-    width: 100%;
-  }
-}
-
-:deep(.p-multiselect) {
-  min-width: 200px;
-}
-
-:deep(.p-multiselect-label) {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 0.5rem;
-}
-
-:deep(.p-multiselect-trigger) {
-  margin-left: auto;
-}
-</style>
