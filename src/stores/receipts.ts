@@ -44,19 +44,55 @@ export const useReceiptsStore = defineStore("receipts", {
         throw error;
       }
     },
-    async add(receipt: any) {
-      await fetch(`${RECEIPTS_URL}`, {
+
+    async add(receipt: Receipt) {
+      const response = await fetch(RECEIPTS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(receipt),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.title || "Failed to add receipt");
+      }
+
+      return await response.json();
     },
-    async update(updated: any) {
-      await fetch(`${RECEIPT_UPDATE_URL}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      });
+
+    async update(updated: Receipt) {
+      if (updated.id === "") {
+        const { id, ...rest } = updated;
+        updated = rest;
+      }
+
+      const payload = {
+        dto: {
+          ...updated,
+          receiptDate: new Date(updated.receiptDate).toISOString(),
+          items: updated.items.map((item) => ({
+            resourceId: item.resourceId,
+            unitId: item.unitId,
+            quantity: item.quantity,
+          })),
+        },
+      };
+
+      const response = await fetch(
+        `${RECEIPT_UPDATE_URL}/${updated.id || ""}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.title || "Failed to update receipt");
+      }
+
+      return await response.json();
     },
     async remove(id: string) {
       await fetch(`${RECEIPT_REMOVE_URL}/${id}`, {

@@ -98,6 +98,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dropdown from 'primevue/dropdown'
 import InputNumber from 'primevue/inputnumber'
+import { Receipt } from '@/types/receipts'
 
 interface ReceiptItem {
   resourceId: string
@@ -173,12 +174,15 @@ const transformUnit = (unit: any) => ({
 
     const saveReceipt = async () => {
       try {
-        const receiptToSave = {
-          ...receipt.value,
+        const receiptToSave: Receipt = {
+          receiptNumber: receipt.value.receiptNumber,
+          receiptDate: receipt.value.receiptDate,
           items: receipt.value.items.map(item => ({
             resourceId: item.resourceId,
             unitId: item.unitId,
-            quantity: item.quantity
+            quantity: item.quantity,
+            resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name,
+            unitName: unitOptions.value.find(u => u.id === item.unitId)?.name
           }))
         }
 

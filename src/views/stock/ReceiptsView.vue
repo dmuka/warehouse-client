@@ -75,7 +75,13 @@
     </div>
   </div>
 
-    <DataTable :value="filteredReceipts" stripedRows>
+    <DataTable
+      :value="filteredReceipts"
+      stripedRows
+      selectionMode="single"
+      @rowSelect="onRowSelect"
+      dataKey="id"
+    >
       <Column field="receiptNumber" header="Номер" sortable></Column>
       <Column field="receiptDate" header="Дата" sortable>
         <template #body="{ data }">
@@ -207,6 +213,10 @@ export default defineComponent({
       return new Date(dateString).toLocaleDateString()
     }
 
+    const onRowSelect = (event: any) => {
+      router.push(`/stock/receipts/edit/${event.data.id}`)
+    }
+
     const navigateToCreate = () => {
       router.push('/stock/receipts/add')
     }
@@ -219,6 +229,7 @@ export default defineComponent({
       unitOptions,
       formatDate,
       navigateToCreate,
+      onRowSelect,
       applyFilters
     }
   }

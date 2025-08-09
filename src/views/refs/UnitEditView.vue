@@ -12,9 +12,11 @@
     form-field-name="unitName"
   >
     <template #default="{ form }">
-      <div class="field">
-        <label for="name">Наименование</label>
-        <InputText id="name" v-model="form.unitName" required />
+      <div class="form-section">
+        <div class="form-row">
+          <label class="form-label">Наименование</label>
+          <InputText id="name" v-model="form.unitName" required />
+        </div>
       </div>
     </template>
   </RefEditView>

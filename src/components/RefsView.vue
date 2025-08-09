@@ -6,7 +6,7 @@
                 <Button v-if="!showArchive && showAddButton" label="Добавить" icon="pi pi-plus"
                     @click="navigateToAdd" />
                 <Button :label="showArchive ? 'К активным' : 'К архиву'"
-                    :icon="showArchive ? 'pi pi-archive' : 'pi pi-tags'" @click="toggleArchive" />
+                    :icon="showArchive ? 'pi pi-briefcase' : 'pi pi-tags'" severity="secondary" @click="toggleArchive" />
             </div>
         </div>
 

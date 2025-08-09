@@ -5,13 +5,10 @@
                 <div class="page-header">
                     <h1>{{ title }}</h1>
                     <div class="header-buttons">
-                        <Button type="submit" label="Сохранить" class="p-button-sm" @click="handleSubmit" />
-                        <Button v-if="showDeleteButton" type="button" label="Удалить" severity="danger"
-                            class="p-button-sm" @click="remove" />
-                        <Button v-if="showArchiveButton" type="button"
-                            :label="isArchived ? 'В работу' : 'В архив'"
-                            severity="secondary" class="p-button-sm"
-                            @click="isArchived ? unarchive() : archive()" />
+                        <Button label="Сохранить" icon="pi pi-save" @click="handleSubmit" />
+                        <Button v-if="showDeleteButton" label="Удалить" icon="pi pi-trash" severity="danger" @click="remove" />
+                        <Button v-if="showArchiveButton" :label="isArchived ? 'В работу' : 'В архив'"
+                            severity="secondary" icon="pi pi-tags" @click="isArchived ? unarchive() : archive()" />
                     </div>
                 </div>
             </template>

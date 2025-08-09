@@ -1,5 +1,5 @@
 export interface ReceiptItem {
-  id: string
+  id?: string
   receiptId?: string
   resourceId: string
   resourceName: string
@@ -9,7 +9,7 @@ export interface ReceiptItem {
 }
 
 export interface Receipt {
-  id: string
+  id?: string
   receiptNumber: string
   receiptDate: string | Date
   items: ReceiptItem[]

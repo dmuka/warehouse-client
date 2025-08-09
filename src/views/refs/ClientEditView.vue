@@ -13,13 +13,15 @@
     form-field-address="clientAddress"
   >
     <template #default="{ form }">
-      <div class="field">
-        <label for="name">Наименование</label>
-        <InputText id="name" v-model="form.clientName" required />
-      </div>
-      <div class="field">
-        <label for="address">Адрес</label>
-        <InputText id="address" v-model="form.clientAddress" required />
+      <div class="form-section">
+        <div class="form-row">
+          <label class="form-label">Наименование</label>
+          <InputText id="name" v-model="form.clientName" required />
+        </div>
+        <div class="form-row">
+          <label class="form-label">Адрес</label>
+          <InputText id="address" v-model="form.clientAddress" required />
+        </div>
       </div>
     </template>
   </RefEditView>

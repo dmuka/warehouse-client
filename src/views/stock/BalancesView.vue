@@ -33,6 +33,15 @@
           panelClass="clean-panel"
         />
       </div>
+
+      <div class="filter-group">
+        <Button
+          label="Применить"
+          @click="applyFilters"
+          :loading="loading"
+          class="p-button-primary"
+        />
+      </div>
     </div>
 
     <DataTable :value="balances" stripedRows class="custom-table" :loading="loading" paginator :rows="10"
@@ -88,8 +97,8 @@ export default defineComponent({
       const resources = new Map<string, FilterOption>()
       balancesStore.balances.forEach(item => {
         if (!resources.has(item.resourceName)) {
-          resources.set(item.resourceName, {
-            id: item.resourceName,
+          resources.set(item.id, {
+            id: item.id,
             name: item.resourceName
           })
         }
@@ -101,8 +110,8 @@ export default defineComponent({
       const units = new Map<string, FilterOption>()
       balancesStore.balances.forEach(item => {
         if (!units.has(item.unitName)) {
-          units.set(item.unitName, {
-            id: item.unitName,
+          units.set(item.id, {
+            id: item.id,
             name: item.unitName
           })
         }
