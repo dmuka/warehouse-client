@@ -4,83 +4,90 @@
       <h1>Поступления</h1>
 
       <div class="filters">
+        <div class="filter-group">
+          <span class="p-float-label">
+            <Calendar
+              id="dateFilterFrom"
+              v-model="dateFrom"
+              dateFormat="dd.mm.yy"
+              showIcon
+            />
+            <label for="dateFilterFrom">От</label>
+          </span>
+          <span class="p-float-label">
+            <Calendar
+              id="dateFilterTo"
+              v-model="dateTo"
+              dateFormat="dd.mm.yy"
+              showIcon
+            />
+            <label for="dateFilterTo">До</label>
+          </span>
+        </div>
 
-      <div class="filter-group">
-        <span class="p-float-label">
-          <Calendar
-            id="dateFilterFrom"
-            v-model="filters.date"
-            dateFormat="dd.mm.yy"
-            showIcon
+        <div class="filter-group">
+          <span class="p-float-label">
+            <InputText id="numberFilter" v-model="number" />
+            <label for="numberFilter">Номер</label>
+          </span>
+        </div>
+
+        <div class="filter-group">
+          <MultiSelect
+            id="resourceFilter"
+            v-model="selectedResources"
+            :options="resourceOptions"
+            optionLabel="name"
+            optionValue="id"
+            display="chip"
+            filter
+            placeholder="Ресурс"
+            class="w-full md:w-80"
           />
-          <label for="dateFilterFrom">От</label>
-        </span>
-        <span class="p-float-label">
-          <Calendar
-            id="dateFilterTo"
-            v-model="filters.date"
-            dateFormat="dd.mm.yy"
-            showIcon
+        </div>
+
+        <div class="filter-group">
+          <MultiSelect
+            id="unitFilter"
+            v-model="selectedUnits"
+            :options="unitOptions"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Единица измерения"
+            class="w-full md:w-80"
+            filter
+            display="chip"
           />
-          <label for="dateFilterTo">До</label>
-        </span>
+        </div>
       </div>
-
-      <div class="filter-group">
-        <span class="p-float-label">
-          <InputText id="numberFilter" v-model="filters.number" />
-          <label for="numberFilter">Номер</label>
-        </span>
-      </div>
-
-      <div class="filter-group">
-        <MultiSelect
-          id="resourceFilter"
-          v-model="filters.resources"
-          :options="resourceOptions"
-          optionLabel="name"
-          optionValue="id"
-          display="chip"
-          filter
-          placeholder="Ресурс"
-          class="w-full md:w-80"
+      <div class="header-buttons">
+        <Button
+          label="Применить"
+          icon="pi pi-filter"
+          @click="applyFilters"
+          :disabled="loading"
         />
-      </div>
-
-      <div class="filter-group">
-        <MultiSelect
-          id="unitFilter"
-          v-model="filters.units"
-          :options="unitOptions"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Единица измерения"
-          class="w-full md:w-80"
-          filter
-          display="chip"
+        <Button
+          label="Добавить"
+          icon="pi pi-plus"
+          @click="navigateToCreate"
+          :disabled="loading"
         />
+        <ProgressSpinner v-if="loading" style="width: 30px; height: 30px" />
       </div>
     </div>
-    <div class="header-buttons">
-      <Button
-        label="Применить"
-        icon="pi pi-filter"
-        @click="applyFilters"
-      />
-      <Button
-        label="Добавить"
-        icon="pi pi-plus"
-        @click="navigateToCreate"
-      />
-    </div>
-  </div>
 
     <DataTable
-      :value="filteredReceipts"
+      :value="receipts"
       stripedRows
       selectionMode="single"
       @rowSelect="onRowSelect"
       dataKey="id"
+      :loading="loading"
+      :paginator="true"
+      :rows="10"
+      :rowsPerPageOptions="[10, 20, 50]"
+      :totalRecords="totalRecords"
     >
       <Column field="receiptNumber" header="Номер" sortable></Column>
       <Column field="receiptDate" header="Дата" sortable>
@@ -117,17 +124,24 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReceiptsStore } from '@/stores/receipts'
-import { Receipt } from '@/types/receipts'
+import { ReceiptFilter } from '@/types/receipts'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Calendar from 'primevue/calendar'
+import ProgressSpinner from 'primevue/progressspinner'
 
 interface FilterOption {
   id: string
   name: string
+  [key: string]: any
+}
+
+interface Pagination {
+  page: number
+  rows: number
 }
 
 export default defineComponent({
@@ -138,28 +152,35 @@ export default defineComponent({
     Column,
     InputText,
     MultiSelect,
-    Calendar
+    Calendar,
+    ProgressSpinner
   },
   setup() {
     const router = useRouter()
     const receiptsStore = useReceiptsStore()
-    const receipts = ref<Receipt[]>([])
-
-    const filters = ref({
-      number: '',
-      date: null as Date | null,
-      resources: [] as string[],
-      units: [] as string[]
+    const loading = ref(false)
+    const totalRecords = ref(0)
+    const pagination = ref<Pagination>({
+      page: 1,
+      rows: 10
     })
+
+    const receipts = computed(() => receiptsStore.receipts)
+
+    const dateFrom = ref<Date>()
+    const dateTo = ref<Date>()
+    const number = ref<string>()
+    const selectedResources = ref<string[]>([])
+    const selectedUnits = ref<string[]>([])
 
     const resourceOptions = computed<FilterOption[]>(() => {
       const resources = new Map<string, FilterOption>()
       receiptsStore.receipts.forEach(receipt => {
         receipt.items.forEach(item => {
-          if (item.resourceId && !resources.has(item.resourceId)) {
+          if (!resources.has(item.resourceId)) {
             resources.set(item.resourceId, {
               id: item.resourceId,
-              name: item.resourceName || item.resourceId
+              name: item.resourceName
             })
           }
         })
@@ -171,10 +192,10 @@ export default defineComponent({
       const units = new Map<string, FilterOption>()
       receiptsStore.receipts.forEach(receipt => {
         receipt.items.forEach(item => {
-          if (item.unitId && !units.has(item.unitId)) {
+          if (!units.has(item.unitId)) {
             units.set(item.unitId, {
               id: item.unitId,
-              name: item.unitName || item.unitId
+              name: item.unitName
             })
           }
         })
@@ -182,35 +203,61 @@ export default defineComponent({
       return Array.from(units.values())
     })
 
-    const filteredReceipts = computed(() => {
-      return receiptsStore.receipts.filter(receipt => {
-        const matchesNumber = !filters.value.number ||
-          receipt.receiptNumber.toLowerCase().includes(filters.value.number.toLowerCase())
+    const applyFilters = async () => {
+      loading.value = true
+      try {
+        const filter: ReceiptFilter = {
+          page: pagination.value.page,
+          size: pagination.value.rows
+        }
 
-        const matchesDate = !filters.value.date ||
-          new Date(receipt.receiptDate).toDateString() === new Date(filters.value.date).toDateString()
+        if (dateFrom.value) {
+          const fromDate = new Date(dateFrom.value)
+          filter.dateFrom = new Date(Date.UTC(
+            fromDate.getFullYear(),
+            fromDate.getMonth(),
+            fromDate.getDate(),
+            0, 0, 0
+          ))
+        }
 
-        const matchesResources = filters.value.resources.length === 0 ||
-          receipt.items.some(item => filters.value.resources.includes(item.resourceId))
+        if (dateTo.value) {
+          const toDate = new Date(dateTo.value)
+          filter.dateTo = new Date(Date.UTC(
+            toDate.getFullYear(),
+            toDate.getMonth(),
+            toDate.getDate(),
+            23, 59, 59
+          ))
+        }
 
-        const matchesUnits = filters.value.units.length === 0 ||
-          receipt.items.some(item => filters.value.units.includes(item.unitId))
+        if (number.value) {
+          filter.receiptNumber = number.value
+        }
 
-        return matchesNumber && matchesDate && matchesResources && matchesUnits
-      })
-    })
+        filter.resourceIds = selectedResources.value
+        filter.unitIds = selectedUnits.value
 
-    const applyFilters = () => {
-      // Filters are applied automatically through computed property
+        await receiptsStore.fetchFilteredReceipts(filter)
+      } catch (error) {
+        console.error('Ошибка при фильтрации поступлений:', error)
+      } finally {
+        loading.value = false
+      }
     }
 
     onMounted(async () => {
       await receiptsStore.fetchReceipts()
-      receipts.value = receiptsStore.receipts
     })
 
     const formatDate = (dateString: string) => {
-      return new Date(dateString).toLocaleDateString()
+      const date = new Date(dateString)
+      return date.toLocaleDateString('ru-RU', {
+        timeZone: 'UTC',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      })
     }
 
     const onRowSelect = (event: any) => {
@@ -223,10 +270,15 @@ export default defineComponent({
 
     return {
       receipts,
-      filteredReceipts,
-      filters,
       resourceOptions,
       unitOptions,
+      loading,
+      totalRecords,
+      dateFrom,
+      dateTo,
+      number,
+      selectedResources,
+      selectedUnits,
       formatDate,
       navigateToCreate,
       onRowSelect,

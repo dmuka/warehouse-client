@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { Receipt } from '@/types/receipts'
-import { RECEIPTS_URL, RECEIPT_UPDATE_URL, RECEIPT_REMOVE_URL } from '../api'
+import { Receipt, ReceptFilter } from '@/types/receipts'
+import { RECEIPTS_URL, RECEIPT_UPDATE_URL, RECEIPT_REMOVE_URL, RECEIPT_FILTER_URL } from '../api'
 
 export const useReceiptsStore = defineStore("receipts", {
   state: () => ({
     receipts: [] as Receipt[],
+    isLoading: false,
+    error: null as string | null
   }),
   actions: {
     async fetchReceipts() {
@@ -15,6 +17,36 @@ export const useReceiptsStore = defineStore("receipts", {
         this.receipts = data;
       } catch (error) {
         console.error("Error loading receipts:", error);
+      }
+    },
+    async fetchFilteredReceipts(filter: ReceptFilter) {
+      try {
+        this.isLoading = true;
+        this.error = null;
+
+        const response = await fetch(RECEIPT_FILTER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(filter),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        this.receipts = await response.json();
+        return this.receipts;
+      } catch (err) {
+        this.error =
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch filtered receipts";
+        console.error("Error fetching filtered receipts:", err);
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
     },
     async getById(id: string) {
@@ -63,7 +95,7 @@ export const useReceiptsStore = defineStore("receipts", {
     async update(updated: Receipt) {
       if (updated.id === "") {
         const { id, ...rest } = updated;
-        updated = rest;
+        updated = { id, ...rest };
       }
 
       const payload = {
