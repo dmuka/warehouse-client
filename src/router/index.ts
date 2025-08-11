@@ -47,6 +47,27 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/stock/ShipmentsView.vue"),
         meta: { title: "Отгрузки", icon: "pi pi-arrow-up" },
       },
+      {
+        path: "/stock/shipments/add",
+        name: "AddShipment",
+        component: () => import("@/views/stock/ShipmentEditView.vue"),
+        meta: {
+          title: "Добавить отгрузку",
+          icon: "pi pi-arrow-down",
+          hideInMenu: true
+        }
+      },
+      {
+        path: "/stock/shipments/edit/:id",
+        name: "EditShipment",
+        component: () => import("@/views/stock/ShipmentEditView.vue"),
+        props: (route) => ({ id: route.params.id }),
+        meta: {
+          title: "Редактировать отгрузку",
+          icon: "pi pi-arrow-down",
+          hideInMenu: true
+        }
+      },
       // Reference routes
       {
         path: "/references/clients",

@@ -9,16 +9,18 @@ export interface ReceiptItem {
 }
 
 export interface Receipt {
-  id: string
+  id?: string
   receiptNumber: string
   receiptDate: string | Date
   items: ReceiptItem[]
 }
 
-interface ReceiptFilter {
+export interface ReceiptFilter {
   dateFrom?: Date
   dateTo?: Date
   receiptNumber?: string
-  resourceId?: string
-  unitId?: string
+  resourceIds?: string[]
+  unitIds?: string[]
+  page: number
+  size: number
 }

@@ -1,0 +1,322 @@
+<template>
+    <div class="shipment-form-view">
+        <div class="page-header">
+            <h1>{{ isEditMode ? 'Редактирование отгрузки' : 'Новая отгрузка' }}</h1>
+            <div class="header-buttons">
+                <Button label="Сохранить" icon="pi pi-save" @click="saveShipment" />
+                <Button v-if="isEditMode" label="Удалить" icon="pi pi-times" class="p-button-secondary ml-2"
+                    @click="removeShipment" />
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-row">
+                <label class="form-label">Номер</label>
+                <InputText id="number" v-model="shipment.shipmentNumber" />
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">Клиент</label>
+                <Dropdown v-model="shipment.clientId" :options="clientOptions" optionLabel="name" optionValue="id"
+                    placeholder="Выберите клиента" @change="updateClientName" />
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">Дата</label>
+                <Calendar id="date" v-model="shipment.shipmentDate" dateFormat="dd.mm.yy" showIcon />
+            </div>
+        </div>
+
+        <div class="items-section">
+            <div class="section-header">
+                <h3>Позиции</h3>
+            </div>
+
+            <DataTable :value="shipment.items" stripedRows>
+                <Column header="">
+                    <template #header>
+                        <Button icon="pi pi-plus" @click="addItem" class="p-button-sm" />
+                    </template>
+                    <template #body="{ index }">
+                        <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm"
+                            @click="removeItem(index)" />
+                    </template>
+                </Column>
+                <Column field="resource" header="Ресурс">
+                    <template #body="{ data, index }">
+                        <Dropdown v-model="shipment.items[index].resourceId" :options="resourceOptions"
+                            optionLabel="name" optionValue="id" placeholder="Выберите ресурс"
+                            @change="updateAvailableQuantity(index)" />
+                    </template>
+                </Column>
+                <Column field="unit" header="Единица измерения">
+                    <template #body="{ data, index }">
+                        <Dropdown v-model="shipment.items[index].unitId" :options="unitOptions" optionLabel="name"
+                            optionValue="id" placeholder="Выберите единицу" @change="updateAvailableQuantity(index)" />
+                    </template>
+                </Column>
+                <Column field="quantity" header="Количество">
+                    <template #body="{ data, index }">
+                        <InputNumber v-model="shipment.items[index].quantity" mode="decimal" :min="0"
+                            :max="getAvailableQuantity(index)" @update:modelValue="validateQuantity(index)" />
+                    </template>
+                </Column>
+                <Column field="available" header="Доступно">
+                    <template #body="{ data, index }">
+                        {{ getAvailableQuantity(index) }}
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+    </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, ref, onMounted, computed, watch, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useShipmentsStore } from '@/stores/shipments'
+import { useResourcesStore } from '@/stores/resources'
+import { useUnitsStore } from '@/stores/units'
+import { useClientsStore } from '@/stores/clients'
+import { useBalancesStore } from '@/stores/balances'
+import { Shipment, ShipmentItem } from '@/types/shipments'
+import { BalanceByResourceAndUnit } from '@/types/balances'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Calendar from 'primevue/calendar'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Dropdown from 'primevue/dropdown'
+import InputNumber from 'primevue/inputnumber'
+
+export default defineComponent({
+    name: 'ShipmentForm',
+    components: {
+        Button,
+        InputText,
+        Calendar,
+        DataTable,
+        Column,
+        Dropdown,
+        InputNumber
+    },
+    props: {
+        id: {
+            type: String,
+            default: null
+        }
+    },
+    setup(props) {
+        const router = useRouter()
+        const shipmentsStore = useShipmentsStore()
+        const resourcesStore = useResourcesStore()
+        const unitsStore = useUnitsStore()
+        const clientsStore = useClientsStore()
+        const balancesStore = useBalancesStore()
+
+        const isEditMode = computed(() => props.id !== null)
+
+        const shipment = ref<Shipment>({
+            id: '',
+            shipmentNumber: '',
+            clientId: '',
+            clientName: '',
+            shipmentDate: new Date(),
+            items: [] as ShipmentItem[]
+        })
+
+        const availableQuantities = ref<{[key: string]: number}>({})
+
+        const transformResource = (resource: any) => ({
+            id: resource.id?.value || resource.id,
+            name: resource.resourceName?.value || resource.name,
+            isActive: resource.isActive
+        })
+
+        const transformUnit = (unit: any) => ({
+            id: unit.id?.value || unit.id,
+            name: unit.unitName?.value || unit.name,
+            isActive: unit.isActive
+        })
+
+        const transformClient = (client: any) => ({
+            id: client.id?.value || client.id,
+            name: client.clientName?.value || client.name,
+            isActive: client.isActive
+        })
+
+        const resourceOptions = computed(() => {
+            return resourcesStore.resources.map(transformResource)
+        })
+
+        const unitOptions = computed(() => {
+            return unitsStore.units.map(transformUnit)
+        })
+
+        const clientOptions = computed(() => {
+            return clientsStore.clients.map(transformClient)
+        })
+
+        onMounted(async () => {
+            try {
+                await Promise.all([
+                    resourcesStore.fetchResources(),
+                    unitsStore.fetchUnits(),
+                    clientsStore.fetchClients()
+                ])
+
+                if (isEditMode.value) {
+                    const existingShipment = await shipmentsStore.getById(props.id)
+                    if (existingShipment) {
+                        shipment.value = {
+                            ...existingShipment,
+                            shipmentDate: new Date(existingShipment.shipmentDate)
+                        }
+
+                        shipment.value.items.forEach((item, index) => {
+                            updateAvailableQuantity(index)
+                        })
+                    }
+                } else {
+                    addItem()
+                }
+            } catch (error) {
+                console.error('Error loading data:', error)
+            }
+        })
+
+        const updateClientName = () => {
+            const selectedClient = clientOptions.value.find(c => c.id === shipment.value.clientId)
+            if (selectedClient) {
+                shipment.value.clientName = selectedClient.name
+            }
+        }
+
+        const updateAvailableQuantity = async (index: number) => {
+            await nextTick()
+
+            const item = shipment.value.items[index]
+
+            if (item.resourceId) {
+                const selectedResource = resourceOptions.value.find(r => r.id === item.resourceId)
+                if (selectedResource) {
+                    item.resourceName = selectedResource.name
+                }
+            }
+
+            if (item.unitId) {
+                const selectedUnit = unitOptions.value.find(u => u.id === item.unitId)
+                if (selectedUnit) {
+                    item.unitName = selectedUnit.name
+                }
+            }
+
+            if (item.resourceId && item.unitId) {
+                try {
+                    const ids: BalanceByResourceAndUnit = {
+                        resourceId: item.resourceId,
+                        unitId: item.unitId
+                    }
+                    const available = await balancesStore.fetchBalanceByResourceAndUnit(ids)
+                    availableQuantities.value[`${index}`] = available || 0
+                } catch (error) {
+                    console.error('Error fetching available quantity:', error)
+                    availableQuantities.value[`${index}`] = 0
+                }
+            } else {
+                availableQuantities.value[`${index}`] = 0
+            }
+        }
+
+        const getAvailableQuantity = (index: number) => {
+            return availableQuantities.value[`${index}`] || 0
+        }
+
+        const validateQuantity = (index: number) => {
+            const maxQuantity = getAvailableQuantity(index)
+            if (shipment.value.items[index].quantity > maxQuantity) {
+                shipment.value.items[index].quantity = maxQuantity
+            }
+        }
+
+        const addItem = () => {
+            shipment.value.items.push({
+                id: '',
+                resourceId: '',
+                resourceName: '',
+                unitId: '',
+                unitName: '',
+                quantity: 0
+            })
+        }
+
+        const removeItem = (index: number) => {
+            shipment.value.items.splice(index, 1)
+            delete availableQuantities.value[`${index}`]
+        }
+
+        const saveShipment = async () => {
+            try {
+                const payload: Shipment = {
+                    id: isEditMode.value ? shipment.value.id : undefined,
+                    shipmentNumber: shipment.value.shipmentNumber,
+                    shipmentDate: shipment.value.shipmentDate,
+                    clientId: shipment.value.clientId,
+                    clientName: shipment.value.clientName,
+                    items: shipment.value.items.map(item => ({
+                        id: item.id,
+                        resourceId: item.resourceId,
+                        unitId: item.unitId,
+                        quantity: item.quantity,
+                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name,
+                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name
+                    }))
+                };
+
+                if (isEditMode.value) {
+                    await shipmentsStore.update(payload);
+                } else {
+                    await shipmentsStore.add(payload);
+                }
+                router.push('/stock/shipments');
+            } catch (error) {
+                console.error('Error saving shipment:', error);
+            }
+        }
+
+        const removeShipment = async () => {
+            await shipmentsStore.remove(props.id)
+            router.push('/stock/shipments')
+        }
+
+        watch(
+            () => shipment.value.items.map(item => ({
+                resourceId: item.resourceId,
+                unitId: item.unitId
+            })),
+            () => {
+                shipment.value.items.forEach((_, index) => {
+                    updateAvailableQuantity(index)
+                })
+            },
+            { deep: true }
+        )
+
+        return {
+            isEditMode,
+            shipment,
+            resourceOptions,
+            unitOptions,
+            clientOptions,
+            addItem,
+            removeItem,
+            saveShipment,
+            removeShipment,
+            updateClientName,
+            updateAvailableQuantity,
+            getAvailableQuantity,
+            validateQuantity
+        }
+    }
+})
+</script>

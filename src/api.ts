@@ -24,6 +24,7 @@ export const CLIENT_UNARCHIVE_URL = `${CLIENTS_URL}/unarchive`
 export const BALANCES_URL = `${API_BASE_URL}/balances`
 export const BALANCE_UPDATE_URL = `${BALANCES_URL}/update`
 export const BALANCE_FILTER_URL = `${BALANCES_URL}/filter`
+export const BALANCE_AVAILABLE_URL = `${BALANCES_URL}/available`
 // Receipts
 export const RECEIPTS_URL = `${API_BASE_URL}/receipts`
 export const RECEIPT_UPDATE_URL = `${RECEIPTS_URL}/update`

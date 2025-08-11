@@ -1,25 +1,12 @@
 import { defineStore } from 'pinia'
-import { SHIPMENTS_URL, SHIPMENT_UPDATE_URL, SHIPMENT_REMOVE_URL } from '../api'
-
-export interface ShipmentItem {
-  shipmentId: string
-  clientId: string
-  status: string
-  resourceId: string
-  unitId: string
-  quantity: number
-}
-
-export interface Shipment {
-  id: string
-  number: string
-  date: string
-  items: ShipmentItem[]
-}
+import { Shipment, ShipmentFilter } from '@/types/shipments'
+import { SHIPMENTS_URL, SHIPMENT_UPDATE_URL, SHIPMENT_REMOVE_URL, SHIPMENT_FILTER_URL } from '../api'
 
 export const useShipmentsStore = defineStore("shipments", {
   state: () => ({
     shipments: [] as Shipment[],
+    isLoading: false,
+    error: null as string | null
   }),
   actions: {
     async fetchShipments() {
@@ -30,6 +17,36 @@ export const useShipmentsStore = defineStore("shipments", {
         this.shipments = data;
       } catch (error) {
         console.error("Error loading shipments:", error);
+      }
+    },
+    async fetchFilteredShipments(filter: ShipmentFilter) {
+      try {
+        this.isLoading = true;
+        this.error = null;
+
+        const response = await fetch(SHIPMENT_FILTER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(filter),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        this.shipments = await response.json();
+        return this.shipments;
+      } catch (err) {
+        this.error =
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch filtered shipments";
+        console.error("Error fetching filtered shipments:", err);
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
     },
     async getById(id: string) {
@@ -59,19 +76,55 @@ export const useShipmentsStore = defineStore("shipments", {
         throw error;
       }
     },
-    async add(shipment: any) {
-      await fetch(`${SHIPMENTS_URL}`, {
+
+    async add(shipment: Shipment) {
+      const response = await fetch(SHIPMENTS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(shipment),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.title || "Failed to add shipment");
+      }
+
+      return await response.json();
     },
-    async update(updated: any) {
-      await fetch(`${SHIPMENT_UPDATE_URL}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      });
+
+    async update(updated: Shipment) {
+      if (updated.id === "") {
+        const { id, ...rest } = updated;
+        updated = { id, ...rest };
+      }
+
+      const payload = {
+        dto: {
+          ...updated,
+          shipmentDate: new Date(updated.shipmentDate).toISOString(),
+          items: updated.items.map((item) => ({
+            resourceId: item.resourceId,
+            unitId: item.unitId,
+            quantity: item.quantity,
+          })),
+        },
+      };
+
+      const response = await fetch(
+        `${SHIPMENT_UPDATE_URL}/${updated.id || ""}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.title || "Failed to update shipment");
+      }
+
+      return await response.json();
     },
     async remove(id: string) {
       await fetch(`${SHIPMENT_REMOVE_URL}/${id}`, {

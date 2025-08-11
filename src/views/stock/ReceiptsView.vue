@@ -28,7 +28,7 @@
         <div class="filter-group">
           <span class="p-float-label">
             <InputText id="numberFilter" v-model="number" />
-            <label for="numberFilter">Номер</label>
+            <label for="numberFilter">Номер поступления</label>
           </span>
         </div>
 

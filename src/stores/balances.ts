@@ -1,17 +1,6 @@
 import { defineStore } from 'pinia'
-import { BALANCES_URL, BALANCE_UPDATE_URL, BALANCE_FILTER_URL } from '../api'
-
-interface Balance {
-  id: string
-  resourceName: string
-  unitName: string
-  quantity: number
-}
-
-interface BalanceFilter {
-  resourceNames?: string[]
-  unitNames?: string[]
-}
+import { BALANCES_URL, BALANCE_UPDATE_URL, BALANCE_FILTER_URL, BALANCE_AVAILABLE_URL } from '../api'
+import { Balance, BalanceByResourceAndUnit, BalanceFilter } from '@/types/balances'
 
 export const useBalancesStore = defineStore('balances', {
   state: () => ({
@@ -41,6 +30,34 @@ export const useBalancesStore = defineStore('balances', {
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to fetch balances'
         console.error('Error fetching balances:', err)
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    async fetchBalanceByResourceAndUnit(ids: BalanceByResourceAndUnit) {
+      try {
+        this.isLoading = true
+        this.error = null
+
+        const response = await fetch(BALANCE_AVAILABLE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(ids)
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const balance = await response.json()
+
+        return balance
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch balance by names'
+        console.error('Error fetching balance by names:', err)
       } finally {
         this.isLoading = false
       }
