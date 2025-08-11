@@ -60,22 +60,11 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useBalancesStore } from '@/stores/balances'
+import { FilterOption } from '@/types/filter'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import MultiSelect from 'primevue/multiselect'
 import Button from 'primevue/button'
-
-interface BalanceItem {
-  id: string
-  resourceName: string
-  unitName: string
-  quantity: number
-}
-
-interface FilterOption {
-  id: string
-  name: string
-}
 
 export default defineComponent({
   name: 'BalancesView',

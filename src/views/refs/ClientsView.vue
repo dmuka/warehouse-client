@@ -12,6 +12,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted } from 'vue'
 import { useClientsStore } from '@/stores/clients'
+import { Client } from '@/types/clients'
 import RefsView from '@/components/RefsView.vue'
 import Column from 'primevue/column'
 
@@ -28,11 +29,11 @@ export default defineComponent({
       clientsStore.fetchClients()
     })
 
-    const transformClient = (client: any) => ({
+    const transformClient = (client: Client) => ({
       ...client,
-      id: client.id.value,
-      name: client.clientName.value,
-      address: client.clientAddress.value
+      id: client.id,
+      name: client.clientName,
+      address: client.clientAddress
     })
 
     const activeClients = computed(() => {

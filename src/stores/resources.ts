@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
+import { Resource } from '@/types/resources'
 import { RESOURCES_URL, RESOURCE_UPDATE_URL, RESOURCE_REMOVE_URL, RESOURCE_ARCHIVE_URL, RESOURCE_UNARCHIVE_URL } from '../api'
 
 export const useResourcesStore = defineStore("resources", {
   state: () => ({
-    resources: [] as Array<{ id: string; name: string; isActive: boolean }>,
+    resources: [] as Array<Resource>,
   }),
   actions: {
     async fetchResources() {
@@ -30,7 +31,7 @@ export const useResourcesStore = defineStore("resources", {
 
         const data = await response.json();
 
-        const index = this.resources.findIndex((r) => r.id === Number(id));
+        const index = this.resources.findIndex((r) => r.id === id);
         if (index !== -1) {
           this.resources[index] = data;
         } else {
@@ -43,14 +44,14 @@ export const useResourcesStore = defineStore("resources", {
         throw error;
       }
     },
-    async add(resource: any) {
+    async add(resource: Resource) {
       await fetch(`${RESOURCES_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(resource),
       });
     },
-    async update(updated: any) {
+    async update(updated: Resource) {
       await fetch(`${RESOURCE_UPDATE_URL}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

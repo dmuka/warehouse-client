@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
+import { Unit } from '@/types/units'
 import { UNITS_URL, UNIT_UPDATE_URL, UNIT_REMOVE_URL, UNIT_ARCHIVE_URL, UNIT_UNARCHIVE_URL } from '../api'
 
 export const useUnitsStore = defineStore("units", {
   state: () => ({
-    units: [] as Array<{ id: string; name: string; isActive: boolean }>,
+    units: [] as Array<Unit>,
   }),
   actions: {
     async fetchUnits() {
@@ -43,14 +44,14 @@ export const useUnitsStore = defineStore("units", {
         throw error;
       }
     },
-    async add(unit: any) {
+    async add(unit: Unit) {
       await fetch(`${UNITS_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(unit),
       });
     },
-    async update(updated: any) {
+    async update(updated: Unit) {
       await fetch(`${UNIT_UPDATE_URL}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

@@ -11,6 +11,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted } from 'vue'
 import { useResourcesStore } from '@/stores/resources'
+import { Resource } from '@/types/resources'
 import RefsView from '@/components/RefsView.vue'
 import Column from 'primevue/column'
 
@@ -27,10 +28,10 @@ export default defineComponent({
       resourcesStore.fetchResources()
     })
 
-    const transformResource = (resource: any) => ({
+    const transformResource = (resource: Resource) => ({
       ...resource,
-      id: resource.id.value,
-      name: resource.resourceName.value
+      id: resource.id,
+      name: resource.resourceName
     })
 
     const activeResources = computed(() => {

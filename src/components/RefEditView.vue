@@ -95,8 +95,8 @@ export default defineComponent({
             if (isEditMode.value && id) {
                 const entity = await props.getFn(id)
                 if (entity) {
-                    form[props.formFieldName] = entity[props.formFieldName]?.value || ''
-                    form[props.formFieldAddress] = entity[props.formFieldAddress]?.value || ''
+                    form[props.formFieldName] = entity[props.formFieldName] || ''
+                    form[props.formFieldAddress] = entity[props.formFieldAddress] || ''
                     form.isActive = entity.isActive
                     isArchived.value = !entity.isActive
                 } else if (route.query[props.formFieldName]) {

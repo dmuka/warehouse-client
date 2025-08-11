@@ -1,14 +1,10 @@
 import { defineStore } from 'pinia'
+import { Client } from '@/types/clients'
 import { CLIENTS_URL, CLIENT_UPDATE_URL, CLIENT_REMOVE_URL, CLIENT_ARCHIVE_URL, CLIENT_UNARCHIVE_URL } from '../api'
 
 export const useClientsStore = defineStore("clients", {
   state: () => ({
-    clients: [] as Array<{
-      id: string;
-      clientName: string;
-      clientAddress: string;
-      isActive: boolean;
-    }>,
+    clients: [] as Array<Client>,
   }),
   actions: {
     async fetchClients() {
@@ -48,14 +44,14 @@ export const useClientsStore = defineStore("clients", {
         throw error;
       }
     },
-    async add(client: any) {
+    async add(client: Client) {
       await fetch(`${CLIENTS_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(client),
       });
     },
-    async update(updated: any) {
+    async update(updated: Client) {
       await fetch(`${CLIENT_UPDATE_URL}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

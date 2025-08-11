@@ -17,11 +17,11 @@
 
             <div class="form-row">
                 <label class="form-label">Дата</label>
-                <Calendar id="date" v-model="receipt.receiptDate" dateFormat="dd.mm.yy" showIcon />
+                <Calendar id="date" v-model="receipt.receiptDate as Date" dateFormat="dd.mm.yy" showIcon />
             </div>
         </div>
 
-        <div class="items-section">
+        <div class="items-section" v-if="receipt.items.length > 0">
             <div class="section-header">
                 <h3>Позиции</h3>
             </div>
@@ -65,6 +65,8 @@ import { useReceiptsStore } from '@/stores/receipts'
 import { useResourcesStore } from '@/stores/resources'
 import { useUnitsStore } from '@/stores/units'
 import { Receipt, ReceiptItem } from '@/types/receipts'
+import { Resource } from '@/types/resources'
+import { Unit } from '@/types/units'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Calendar from 'primevue/calendar'
@@ -98,22 +100,22 @@ export default defineComponent({
 
         const isEditMode = computed(() => props.id !== null)
 
-        const receipt = ref({
+        const receipt = ref<Receipt>({
             id: '',
             receiptNumber: '',
             receiptDate: new Date(),
             items: [] as ReceiptItem[]
         })
 
-        const transformResource = (resource: any) => ({
-            id: resource.id?.value || resource.id,
-            name: resource.resourceName?.value || resource.name,
+        const transformResource = (resource: Resource) => ({
+            id: resource.id,
+            name: resource.resourceName,
             isActive: resource.isActive
         })
 
-        const transformUnit = (unit: any) => ({
-            id: unit.id?.value || unit.id,
-            name: unit.unitName?.value || unit.name,
+        const transformUnit = (unit: Unit) => ({
+            id: unit.id,
+            name: unit.unitName,
             isActive: unit.isActive
         })
 
@@ -156,7 +158,7 @@ export default defineComponent({
                 unitId: '',
                 unitName: '',
                 quantity: 0
-            })
+            } as ReceiptItem)
         }
 
         const removeItem = (index: number) => {
@@ -170,11 +172,12 @@ export default defineComponent({
                     receiptNumber: receipt.value.receiptNumber,
                     receiptDate: receipt.value.receiptDate,
                     items: receipt.value.items.map(item => ({
+                        id: item.id,
                         resourceId: item.resourceId,
                         unitId: item.unitId,
                         quantity: item.quantity,
-                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name,
-                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name
+                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name || '',
+                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name || ''
                     }))
                 };
 

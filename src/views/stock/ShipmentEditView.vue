@@ -23,11 +23,11 @@
 
             <div class="form-row">
                 <label class="form-label">Дата</label>
-                <Calendar id="date" v-model="shipment.shipmentDate" dateFormat="dd.mm.yy" showIcon />
+                <Calendar id="date" v-model="shipment.shipmentDate as Date" dateFormat="dd.mm.yy" showIcon />
             </div>
         </div>
 
-        <div class="items-section">
+        <div class="items-section" v-if="shipment.items.length > 0">
             <div class="section-header">
                 <h3>Позиции</h3>
             </div>
@@ -73,7 +73,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed, watch, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useShipmentsStore } from '@/stores/shipments'
 import { useResourcesStore } from '@/stores/resources'
 import { useUnitsStore } from '@/stores/units'
@@ -81,6 +81,10 @@ import { useClientsStore } from '@/stores/clients'
 import { useBalancesStore } from '@/stores/balances'
 import { Shipment, ShipmentItem } from '@/types/shipments'
 import { BalanceByResourceAndUnit } from '@/types/balances'
+import { Resource } from '@/types/resources'
+import { Unit } from '@/types/units'
+import { Client } from '@/types/clients'
+import { SHIPMENTS } from '@/router/routes'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Calendar from 'primevue/calendar'
@@ -127,21 +131,21 @@ export default defineComponent({
 
         const availableQuantities = ref<{[key: string]: number}>({})
 
-        const transformResource = (resource: any) => ({
-            id: resource.id?.value || resource.id,
-            name: resource.resourceName?.value || resource.name,
+        const transformResource = (resource: Resource) => ({
+            id: resource.id,
+            name: resource.resourceName,
             isActive: resource.isActive
         })
 
-        const transformUnit = (unit: any) => ({
-            id: unit.id?.value || unit.id,
-            name: unit.unitName?.value || unit.name,
+        const transformUnit = (unit: Unit) => ({
+            id: unit.id,
+            name: unit.unitName,
             isActive: unit.isActive
         })
 
-        const transformClient = (client: any) => ({
-            id: client.id?.value || client.id,
-            name: client.clientName?.value || client.name,
+        const transformClient = (client: Client) => ({
+            id: client.id,
+            name: client.clientName,
             isActive: client.isActive
         })
 
@@ -247,7 +251,7 @@ export default defineComponent({
                 unitId: '',
                 unitName: '',
                 quantity: 0
-            })
+            } as ShipmentItem)
         }
 
         const removeItem = (index: number) => {
@@ -268,8 +272,8 @@ export default defineComponent({
                         resourceId: item.resourceId,
                         unitId: item.unitId,
                         quantity: item.quantity,
-                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name,
-                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name
+                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name || '',
+                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name || ''
                     }))
                 };
 
@@ -278,7 +282,7 @@ export default defineComponent({
                 } else {
                     await shipmentsStore.add(payload);
                 }
-                router.push('/stock/shipments');
+                router.push(SHIPMENTS);
             } catch (error) {
                 console.error('Error saving shipment:', error);
             }
@@ -286,7 +290,7 @@ export default defineComponent({
 
         const removeShipment = async () => {
             await shipmentsStore.remove(props.id)
-            router.push('/stock/shipments')
+            router.push(SHIPMENTS)
         }
 
         watch(

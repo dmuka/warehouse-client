@@ -11,6 +11,7 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted } from 'vue'
 import { useUnitsStore } from '@/stores/units'
+import { Unit } from '@/types/units'
 import RefsView from '@/components/RefsView.vue'
 import Column from 'primevue/column'
 
@@ -27,10 +28,10 @@ export default defineComponent({
       unitsStore.fetchUnits()
     })
 
-    const transformUnit = (unit: any) => ({
+    const transformUnit = (unit: Unit) => ({
       ...unit,
-      id: unit.id.value,
-      name: unit.unitName.value
+      id: unit.id,
+      name: unit.unitName
     })
 
     const activeUnits = computed(() => {

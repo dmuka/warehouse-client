@@ -125,6 +125,10 @@ import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReceiptsStore } from '@/stores/receipts'
 import { ReceiptFilter } from '@/types/receipts'
+import { RECEIPT_ADD, RECEIPT_EDIT } from '@/router/routes'
+import { DataTableRowSelectEvent } from 'primevue/datatable'
+import { FilterOption } from '@/types/filter'
+import { Pagination } from '@/types/pagination'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -132,17 +136,6 @@ import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Calendar from 'primevue/calendar'
 import ProgressSpinner from 'primevue/progressspinner'
-
-interface FilterOption {
-  id: string
-  name: string
-  [key: string]: any
-}
-
-interface Pagination {
-  page: number
-  rows: number
-}
 
 export default defineComponent({
   name: 'ReceiptsView',
@@ -260,12 +253,12 @@ export default defineComponent({
       })
     }
 
-    const onRowSelect = (event: any) => {
-      router.push(`/stock/receipts/edit/${event.data.id}`)
+    const onRowSelect = (event: DataTableRowSelectEvent) => {
+      router.push(RECEIPT_EDIT.replace(':id', event.data.id))
     }
 
     const navigateToCreate = () => {
-      router.push('/stock/receipts/add')
+      router.push(RECEIPT_ADD)
     }
 
     return {
