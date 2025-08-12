@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { Receipt, ReceptFilter } from '@/types/receipts'
+import { Receipt, ReceiptFilter } from '@/types/receipts'
 import { RECEIPTS_URL, RECEIPT_UPDATE_URL, RECEIPT_REMOVE_URL, RECEIPT_FILTER_URL } from '../api'
 
 export const useReceiptsStore = defineStore("receipts", {
@@ -19,7 +19,7 @@ export const useReceiptsStore = defineStore("receipts", {
         console.error("Error loading receipts:", error);
       }
     },
-    async fetchFilteredReceipts(filter: ReceptFilter) {
+    async fetchFilteredReceipts(filter: ReceiptFilter) {
       try {
         this.isLoading = true;
         this.error = null;

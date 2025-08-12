@@ -282,7 +282,7 @@ export default defineComponent({
                 } else {
                     await shipmentsStore.add(payload);
                 }
-                router.push(SHIPMENTS);
+                navigateBack()
             } catch (error) {
                 console.error('Error saving shipment:', error);
             }
@@ -290,6 +290,10 @@ export default defineComponent({
 
         const removeShipment = async () => {
             await shipmentsStore.remove(props.id)
+            navigateBack()
+        }
+
+        const navigateBack = () => {
             router.push(SHIPMENTS)
         }
 

@@ -106,7 +106,7 @@
       <Column field="shipmentNumber" header="Номер" sortable></Column>
       <Column field="shipmentDate" header="Дата" sortable>
         <template #body="{ data }">
-          {{ formatDate(data.shipmenDate) }}
+          {{ formatDate(data.shipmentDate) }}
         </template>
       </Column>
       <Column header="Клиент">

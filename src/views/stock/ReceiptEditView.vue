@@ -67,6 +67,7 @@ import { useUnitsStore } from '@/stores/units'
 import { Receipt, ReceiptItem } from '@/types/receipts'
 import { Resource } from '@/types/resources'
 import { Unit } from '@/types/units'
+import { RECEIPTS, Receipts } from '@/router/routes'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Calendar from 'primevue/calendar'
@@ -186,7 +187,7 @@ export default defineComponent({
                 } else {
                     await receiptsStore.add(payload);
                 }
-                router.push('/stock/receipts');
+                navigateBack()
             } catch (error) {
                 console.error('Error saving receipt:', error);
             }
@@ -194,6 +195,11 @@ export default defineComponent({
 
         const removeReceipt = async () => {
             await receiptsStore.remove(props.id)
+            navigateBack()
+        }
+
+        const navigateBack = () => {
+            router.push(RECEIPTS)
         }
 
         return {
@@ -204,7 +210,8 @@ export default defineComponent({
             addItem,
             removeItem,
             saveReceipt,
-            removeReceipt
+            removeReceipt,
+            navigateBack
         }
     }
 })
