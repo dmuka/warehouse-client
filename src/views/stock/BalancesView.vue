@@ -6,54 +6,31 @@
 
     <div class="filters">
       <div class="filter-group">
-        <MultiSelect
-          id="resourceFilter"
-          v-model="selectedResources"
-          :options="resourceOptions"
-          optionLabel="name"
-          optionValue="id"
-          display="chip"
-          filter
-          placeholder="Выберите ресурсы"
-          class="w-full md:w-80"
-        />
+        <MultiSelect id="resourceFilter" v-model="selectedResources" :options="resourceOptions" optionLabel="itemName"
+          optionValue="itemId" display="chip" filter placeholder="Выберите ресурсы" class="w-full md:w-80" />
       </div>
 
       <div class="filter-group">
-        <MultiSelect
-          id="unitFilter"
-          v-model="selectedUnits"
-          :options="unitOptions"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Выберите единицы"
-          class="w-full md:w-80"
-          filter
-          display="chip"
-          panelClass="clean-panel"
-        />
+        <MultiSelect id="unitFilter" v-model="selectedUnits" :options="unitOptions" optionLabel="itemName"
+          optionValue="itemId" placeholder="Выберите единицы" class="w-full md:w-80" filter display="chip"
+          panelClass="clean-panel" />
       </div>
 
       <div class="filter-group">
-        <Button
-          label="Применить"
-          @click="applyFilters"
-          :loading="loading"
-          class="p-button-primary"
-        />
+        <Button label="Применить" @click="applyFilters" :loading="loading" class="p-button-primary" />
       </div>
     </div>
 
-    <DataTable :value="balances" stripedRows showGridlines class="custom-table" :loading="loading" paginator :rows="10"
-        :rowsPerPageOptions="[5, 10, 20, 50]">
-        <Column field="resourceName" header="Ресурс" sortable></Column>
-        <Column field="unitName" header="Единица измерения" sortable></Column>
-        <Column field="quantity" header="Баланс" sortable>
-          <template #body="{ data }">
-            {{ formatNumber(data.quantity) }}
-          </template>
-        </Column>
-      </DataTable>
+    <DataTable v-if="balances.length > 0" :value="balances" stripedRows showGridlines class="custom-table"
+      :loading="loading" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]">
+      <Column field="resourceName" header="Ресурс" sortable></Column>
+      <Column field="unitName" header="Единица измерения" sortable></Column>
+      <Column field="quantity" header="Баланс" sortable>
+        <template #body="{ data }">
+          {{ formatNumber(data.quantity) }}
+        </template>
+      </Column>
+    </DataTable>
   </div>
 </template>
 
@@ -61,6 +38,7 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useBalancesStore } from '@/stores/balances'
 import { FilterOption } from '@/types/filter'
+import { useToast } from 'primevue/usetoast'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import MultiSelect from 'primevue/multiselect'
@@ -77,6 +55,7 @@ export default defineComponent({
   setup() {
     const balancesStore = useBalancesStore()
     const loading = ref(false)
+    const toast = useToast();
 
     onMounted(() => {
       balancesStore.fetchAllBalances()
@@ -86,14 +65,13 @@ export default defineComponent({
     const selectedUnits = ref<string[]>([])
 
     const balances = computed(() => balancesStore.balances)
-
     const resourceOptions = computed<FilterOption[]>(() => {
       const resources = new Map<string, FilterOption>()
       balancesStore.balances.forEach(item => {
-        if (!resources.has(item.resourceName)) {
-          resources.set(item.id, {
-            id: item.id,
-            name: item.resourceName
+        if (!resources.has(item.resourceId)) {
+          resources.set(item.resourceId, {
+            itemId: item.resourceId,
+            itemName: item.resourceName
           })
         }
       })
@@ -103,10 +81,10 @@ export default defineComponent({
     const unitOptions = computed<FilterOption[]>(() => {
       const units = new Map<string, FilterOption>()
       balancesStore.balances.forEach(item => {
-        if (!units.has(item.unitName)) {
-          units.set(item.id, {
-            id: item.id,
-            name: item.unitName
+        if (!units.has(item.unitId)) {
+          units.set(item.unitId, {
+            itemId: item.unitId,
+            itemName: item.unitName
           })
         }
       })
@@ -121,6 +99,12 @@ export default defineComponent({
           unitNames: selectedUnits.value.length ? selectedUnits.value : undefined
         })
       } catch (error) {
+        toast.add({
+          severity: 'error',
+          summary: 'Filter Error',
+          detail: error instanceof Error ? error.message : 'Failed to apply filters',
+          life: 3000
+        })
         console.error('Ошибка при фильтрации баланса:', error)
       } finally {
         loading.value = false

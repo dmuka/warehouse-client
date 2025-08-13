@@ -25,6 +25,7 @@
 <script lang="ts">
 import { defineComponent, reactive, computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 
@@ -80,6 +81,7 @@ export default defineComponent({
     setup(props) {
         const route = useRoute()
         const router = useRouter()
+        const toast = useToast()
 
         const form = reactive({
             [props.formFieldName]: '',
@@ -92,12 +94,11 @@ export default defineComponent({
         const isArchived = ref(false)
 
         onMounted(async () => {
-            await props.fetchFn()
             if (isEditMode.value && id) {
                 const entity = await props.getFn(id)
                 if (entity) {
-                    form[props.formFieldName] = entity[props.formFieldName].value || ''
-                    form[props.formFieldAddress] = entity[props.formFieldAddress].value || ''
+                    form[props.formFieldName] = entity[props.formFieldName] || ''
+                    form[props.formFieldAddress] = entity[props.formFieldAddress] || ''
                     form.isActive = entity.isActive
                     isArchived.value = !entity.isActive
                 } else if (route.query[props.formFieldName]) {
@@ -114,22 +115,32 @@ export default defineComponent({
         const handleSubmit = async () => {
             try {
                 if (isEditMode.value && id) {
-                    await props.updateFn({
-                        id: id,
-                        [props.formFieldName]: form[props.formFieldName],
-                        [props.formFieldAddress]: form[props.formFieldAddress],
-                        isActive: form.isActive
-                    })
+                    try {
+                        await props.updateFn({
+                            id: id,
+                            [props.formFieldName]: form[props.formFieldName],
+                            [props.formFieldAddress]: form[props.formFieldAddress],
+                            isActive: form.isActive
+                        })
+                        showSuccessToast('Updated')
+                    }
+                    catch (error) {
+                    }
                 } else {
-                    await props.addFn({
-                        [props.formFieldName]: form[props.formFieldName],
-                        [props.formFieldAddress]: form[props.formFieldAddress],
-                        isActive: true
-                    })
+                    try {
+                        await props.addFn({
+                            [props.formFieldName]: form[props.formFieldName],
+                            [props.formFieldAddress]: form[props.formFieldAddress],
+                            isActive: true
+                        })
+                        showSuccessToast('Added')
+                    }
+                    catch (error) {
+                    }
                 }
                 navigateBack()
             } catch (error) {
-                
+
             }
         }
 
@@ -138,6 +149,7 @@ export default defineComponent({
                 await props.archiveFn(id)
                 form.isActive = false
                 isArchived.value = true
+                showSuccessToast('Archived')
                 navigateBack()
             }
         }
@@ -147,13 +159,15 @@ export default defineComponent({
                 await props.unarchiveFn(id)
                 form.isActive = true
                 isArchived.value = false
+                showSuccessToast('Unarchived')
                 navigateBack()
             }
         }
 
-        const remove = () => {
+        const remove = async () => {
             if (id) {
-                props.removeFn(id)
+                await props.removeFn(id)
+                showSuccessToast('Removed')
                 navigateBack()
             }
         }
@@ -161,6 +175,15 @@ export default defineComponent({
         const navigateBack = () => {
             props.fetchFn()
             router.push(props.listRoute)
+        }
+
+        const showSuccessToast = (detail: string) => {
+            toast.add({
+                severity: 'success',
+                summary: 'Успешно',
+                detail,
+                life: 3000
+            })
         }
 
         return {
@@ -174,6 +197,7 @@ export default defineComponent({
             archive,
             unarchive,
             remove,
+            showSuccessToast,
             navigateBack
         }
     }

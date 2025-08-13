@@ -121,11 +121,15 @@ export default defineComponent({
         })
 
         const resourceOptions = computed(() => {
-            return resourcesStore.resources.map(transformResource)
+            return resourcesStore.resources
+                .filter(resource => resource.isActive)
+                .map(transformResource)
         })
 
         const unitOptions = computed(() => {
-            return unitsStore.units.map(transformUnit)
+            return unitsStore.units
+                .filter(unit => unit.isActive)
+                .map(transformUnit)
         })
 
         onMounted(async () => {

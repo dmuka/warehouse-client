@@ -3,18 +3,15 @@
         <div class="page-header">
             <h1>{{ isEditMode ? 'Редактирование отгрузки' : 'Новая отгрузка' }}</h1>
             <div class="header-buttons">
-                <Button v-if="!isEditMode" label="Добавить" icon="pi pi-save" @click="saveShipment(false)"
-                    class="p-button-secondary ml-2" />
-                <Button v-if="!isEditMode" label="Добавить и подписать" icon="pi pi-save" @click="saveShipment(true)"
-                    class="p-button-success" />
-                <Button v-if="isEditMode && shipment.status === 'Signed'" label="Отозвать" icon="pi pi-undo"
-                    @click="withdrawShipment" class="p-button-warning" />
+                <Button v-if="!isEditMode" label="Добавить" icon="pi pi-save" @click="saveShipment(false)" />
+                <Button v-if="!isEditMode" label="Добавить и подписать" icon="pi pi-save" severity="secondary" @click="saveShipment(true)" />
+                <Button v-if="isEditMode && shipment.status === 'Signed'" label="Отозвать" icon="pi pi-undo" @click="withdrawShipment" />
                 <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Сохранить" icon="pi pi-save"
-                    @click="saveShipment(false)" class="p-button-secondary ml-2" />
+                    @click="saveShipment(false)" />
                 <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Сохранить и подписать"
-                    icon="pi pi-save" @click="saveShipment(true)" class="p-button-success" />
-                <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Удалить" icon="pi pi-trash"
-                    class="p-button-danger ml-2" @click="removeShipment" />
+                    icon="pi pi-save" severity="secondary" @click="saveShipment(true)" />
+                <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Удалить" severity="danger" icon="pi pi-trash"
+                     @click="removeShipment" />
             </div>
         </div>
 
@@ -88,7 +85,7 @@ import { useResourcesStore } from '@/stores/resources'
 import { useUnitsStore } from '@/stores/units'
 import { useClientsStore } from '@/stores/clients'
 import { useBalancesStore } from '@/stores/balances'
-import { Shipment, ShipmentItem } from '@/types/shipments'
+import { Shipment, ShipmentItem, ShipmentItemRequest, ShipmentRequest } from '@/types/shipments'
 import { BalanceByResourceAndUnit } from '@/types/balances'
 import { Resource } from '@/types/resources'
 import { Unit } from '@/types/units'
@@ -266,29 +263,47 @@ export default defineComponent({
 
         const saveShipment = async (sign: boolean) => {
             try {
-                const payload: Shipment = {
+                const payload: ShipmentRequest = {
                     shipmentNumber: shipment.value.shipmentNumber,
-                    clientId: shipment.value.clientId,
-                    clientName: shipment.value.clientName,
                     shipmentDate: shipment.value.shipmentDate instanceof Date
                         ? shipment.value.shipmentDate.toISOString()
                         : shipment.value.shipmentDate,
+                    clientId: shipment.value.clientId,
+                    clientName: shipment.value.clientName,
                     status: sign ? 'Signed' : 'Draft',
                     items: shipment.value.items
                         .map(item => ({
-                            id: item.id,
-                            shipmentId: shipment.value.id,
                             resourceId: item.resourceId,
                             resourceName: item.resourceName,
                             unitId: item.unitId,
                             unitName: item.unitName,
                             quantity: item.quantity
-                        } )) as ShipmentItem[]
+                        } as ShipmentItemRequest)) as ShipmentItem[]
                 };
 
-                console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Debug log
-
                 if (isEditMode.value) {
+
+                    const payload: Shipment = {
+                        id: shipment.value.id,
+                        shipmentNumber: shipment.value.shipmentNumber,
+                        shipmentDate: shipment.value.shipmentDate instanceof Date
+                            ? shipment.value.shipmentDate.toISOString()
+                            : shipment.value.shipmentDate,
+                        clientId: shipment.value.clientId,
+                        clientName: shipment.value.clientName,
+                        status: sign ? 'Signed' : 'Draft',
+                        items: shipment.value.items
+                            .map(item => ({
+                                id: item.id,
+                                shipmentId: shipment.value.id,
+                                resourceId: item.resourceId,
+                                resourceName: item.resourceName,
+                                unitId: item.unitId,
+                                unitName: item.unitName,
+                                quantity: item.quantity
+                            } as ShipmentItem)) as ShipmentItem[]
+                    };
+
                     await shipmentsStore.update({
                         id: shipment.value.id,
                         ...payload

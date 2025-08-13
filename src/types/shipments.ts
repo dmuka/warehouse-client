@@ -18,6 +18,21 @@ export interface Shipment {
   items: ShipmentItem[]
 }
 
+export interface ShipmentRequest {
+  shipmentNumber: string
+  clientId: string
+  clientName: string
+  shipmentDate: string | Date
+  status: string;
+  items: ShipmentItemRequest[]
+}
+export interface ShipmentItemRequest {
+  resourceId: string
+  resourceName: string
+  unitId: string
+  unitName: string
+  quantity: number
+}
 export interface ShipmentFilter {
   dateFrom?: Date
   dateTo?: Date

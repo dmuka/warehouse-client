@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <DataTable :value="showArchive ? archivedItems : activeItems" stripedRows showGridlines  selectionMode="single"
+        <DataTable v-if="showArchive ? archivedItems.length > 0 : activeItems.length > 0" :value="showArchive ? archivedItems : activeItems" stripedRows showGridlines  selectionMode="single"
             @rowSelect="navigateToEdit" class="custom-table">
             <slot name="columns"></slot>
         </DataTable>

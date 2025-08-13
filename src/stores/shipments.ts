@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { Shipment, ShipmentFilter } from '@/types/shipments'
+import { Shipment, ShipmentFilter, ShipmentRequest } from '@/types/shipments'
 import { SHIPMENTS_URL, SHIPMENT_UPDATE_URL, SHIPMENT_REMOVE_URL, SHIPMENT_FILTER_URL } from '../api'
 
 export const useShipmentsStore = defineStore("shipments", {
@@ -77,7 +77,7 @@ export const useShipmentsStore = defineStore("shipments", {
       }
     },
 
-    async add(shipment: Shipment) {
+    async add(shipment: ShipmentRequest) {
       const response = await fetch(SHIPMENTS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,6 +102,7 @@ export const useShipmentsStore = defineStore("shipments", {
         ...updated,
         shipmentDate: new Date(updated.shipmentDate).toISOString(),
         items: updated.items.map((item) => ({
+          id: item.id,
           resourceId: item.resourceId,
           resourceName: item.resourceName,
           unitId: item.unitId,

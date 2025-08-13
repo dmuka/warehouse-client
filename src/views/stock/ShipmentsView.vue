@@ -6,13 +6,13 @@
       <div class="filters">
         <div class="filter-group">
           <span class="p-float-label">
-            <Calendar id="dateFilterFrom" v-model="dateFrom" dateFormat="dd.mm.yy" showIcon />
+            <Calendar id="dateFilterFrom" v-model="dateFrom" dateFormat="dd.mm.yy" showIcon class="w-full md:w-80" />
             <label for="dateFilterFrom">От</label>
           </span>
         </div>
         <div>
           <span class="p-float-label">
-            <Calendar id="dateFilterTo" v-model="dateTo" dateFormat="dd.mm.yy" showIcon />
+            <Calendar id="dateFilterTo" v-model="dateTo" dateFormat="dd.mm.yy" showIcon class="w-full md:w-80" />
             <label for="dateFilterTo">До</label>
           </span>
         </div>
@@ -41,12 +41,12 @@
       </div>
       <div class="header-buttons">
         <Button label="Применить" icon="pi pi-filter" @click="applyFilters" :disabled="loading" />
-        <Button label="Добавить" icon="pi pi-plus" @click="navigateToCreate" :disabled="loading" />
+        <Button label="Добавить" icon="pi pi-plus" @click="navigateToCreate" severity="secondary" :disabled="loading" />
         <ProgressSpinner v-if="loading" style="width: 30px; height: 30px" />
       </div>
     </div>
 
-    <DataTable :value="shipments" stripedRows showGridlines selectionMode="single" @rowSelect="onRowSelect" dataKey="id"
+    <DataTable v-if="shipments.length > 0" :value="shipments" stripedRows showGridlines selectionMode="single" @rowSelect="onRowSelect" dataKey="id"
       :loading="loading" :paginator="true" :rows="10" :rowsPerPageOptions="[10, 20, 50]" :totalRecords="totalRecords">
       <Column field="shipmentNumber" header="Номер" sortable></Column>
       <Column field="shipmentDate" header="Дата" sortable>

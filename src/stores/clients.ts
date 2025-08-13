@@ -1,85 +1,140 @@
-import { defineStore } from 'pinia'
-import { Client } from '@/types/clients'
-import { CLIENTS_URL, CLIENT_UPDATE_URL, CLIENT_REMOVE_URL, CLIENT_ARCHIVE_URL, CLIENT_UNARCHIVE_URL } from '../api'
+import { defineStore } from "pinia";
+import { Client } from "@/types/clients";
+import {
+  CLIENTS_URL,
+  CLIENT_UPDATE_URL,
+  CLIENT_REMOVE_URL,
+  CLIENT_ARCHIVE_URL,
+  CLIENT_UNARCHIVE_URL,
+} from "../api";
+import { apiFetch } from "@/services/api-client";
 
 export const useClientsStore = defineStore("clients", {
   state: () => ({
     clients: [] as Array<Client>,
+    loading: false,
   }),
+
   actions: {
     async fetchClients() {
+      this.loading = true;
       try {
-        const response = await fetch(CLIENTS_URL);
-        if (!response.ok) throw new Error("Failed to fetch clients");
-        const data = await response.json();
-        this.clients = data;
-      } catch (error) {
-        console.error("Error loading clients:", error);
+        const data = await apiFetch<Client[]>(CLIENTS_URL, {
+          showToast: true,
+        });
+
+        if (data) this.clients = data;
+      } finally {
+        this.loading = false;
       }
     },
+
     async getById(id: string) {
+      this.loading = true;
       try {
-        const response = await fetch(`${CLIENTS_URL}/${id}`);
+        const client = await apiFetch<Client>(`${CLIENTS_URL}/${id}`, {
+          showToast: true,
+        });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(
-            errorData?.message ||
-              `Failed to fetch client: ${response.status} ${response.statusText}`
-          );
+        if (client) {
+          const index = this.clients.findIndex((c) => c.id === id);
+
+          if (index !== -1) {
+            this.clients[index] = client;
+          } else {
+            this.clients.push(client);
+          }
         }
 
-        const data = await response.json();
-
-        const index = this.clients.findIndex((r) => r.id === id);
-        if (index !== -1) {
-          this.clients[index] = data;
-        } else {
-          this.clients.push(data);
-        }
-
-        return data;
-      } catch (error) {
-        console.error(`Error loading client with ID ${id}:`, error);
-        throw error;
+        return client;
+      } finally {
+        this.loading = false;
       }
     },
-    async add(client: Client) {
-      await fetch(`${CLIENTS_URL}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(client),
-      });
+
+    async add(client: Omit<Client, "id">) {
+      this.loading = true;
+      try {
+        const newClient = await apiFetch<Client>(CLIENTS_URL, {
+          method: "POST",
+          body: JSON.stringify(client),
+          showToast: true,
+        });
+
+        if (newClient) this.clients.push(newClient);
+
+        return newClient;
+      } finally {
+        this.loading = false;
+      }
     },
+
     async update(updated: Client) {
-      await fetch(`${CLIENT_UPDATE_URL}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      });
-    },
-    async archive(id: string) {
-      await fetch(`${CLIENT_ARCHIVE_URL}/${id}`, {
-        method: "PATCH",
-      });
-      const index = this.clients.findIndex((r) => r.id === id);
-      if (index !== -1) {
-        this.clients[index].isActive = false;
+      this.loading = true;
+      try {
+        const client = await apiFetch<Client>(CLIENT_UPDATE_URL, {
+          method: "PUT",
+          body: JSON.stringify(updated),
+          showToast: true,
+        });
+
+        if (client) {
+          const index = this.clients.findIndex((c) => c.id === client.id);
+          if (index !== -1) {
+            this.clients[index] = client;
+          }
+        }
+        return client;
+      } finally {
+        this.loading = false;
       }
     },
-    async unarchive(id: string) {
-      await fetch(`${CLIENT_UNARCHIVE_URL}/${id}`, {
-        method: "PATCH",
-      });
-      const index = this.clients.findIndex((u) => u.id === id);
-      if (index !== -1) {
-        this.clients[index].isActive = true;
+
+    async archive(id: string): Promise<void> {
+      try {
+        await apiFetch(`${CLIENT_ARCHIVE_URL}/${id}`, {
+          method: "PATCH",
+          allowEmptyResponse: true,
+          showToast: true,
+        });
+
+      } catch (error) {
+        console.error("Archive failed:", error)
+        throw error
       }
     },
-    async remove(id: string) {
-      await fetch(`${CLIENT_REMOVE_URL}/${id}`, {
-        method: "DELETE",
-      });
+
+    async unarchive(id: string): Promise<void> {
+      this.loading = true;
+      try {
+        await apiFetch<void>(`${CLIENT_UNARCHIVE_URL}/${id}`, {
+          method: "PATCH",
+          showToast: true,
+          allowEmptyResponse: true,
+        });
+
+        const index = this.clients.findIndex((c) => c.id === id);
+        if (index !== -1) {
+          this.clients[index].isActive = true;
+        }
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async remove(id: string): Promise<void> {
+      this.loading = true;
+      try {
+        await apiFetch<void>(`${CLIENT_REMOVE_URL}/${id}`, {
+          method: "DELETE",
+          showToast: true,
+          allowEmptyResponse: true,
+        });
+
+        this.clients = this.clients.filter((c) => c.id !== id);
+      } finally {
+        this.loading = false;
+      }
     },
   },
-});
+})

@@ -1,6 +1,8 @@
 export interface Balance {
   id: string
+  resourceId: string
   resourceName: string
+  unitId: string
   unitName: string
   quantity: number
 }
