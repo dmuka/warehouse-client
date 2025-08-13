@@ -6,21 +6,13 @@
       <div class="filters">
         <div class="filter-group">
           <span class="p-float-label">
-            <Calendar
-              id="dateFilterFrom"
-              v-model="dateFrom"
-              dateFormat="dd.mm.yy"
-              showIcon
-            />
+            <Calendar id="dateFilterFrom" v-model="dateFrom" dateFormat="dd.mm.yy" showIcon />
             <label for="dateFilterFrom">От</label>
           </span>
+        </div>
+        <div>
           <span class="p-float-label">
-            <Calendar
-              id="dateFilterTo"
-              v-model="dateTo"
-              dateFormat="dd.mm.yy"
-              showIcon
-            />
+            <Calendar id="dateFilterTo" v-model="dateTo" dateFormat="dd.mm.yy" showIcon />
             <label for="dateFilterTo">До</label>
           </span>
         </div>
@@ -33,76 +25,29 @@
         </div>
 
         <div class="filter-group">
-          <MultiSelect
-            id="clientFilter"
-            v-model="selectedClients"
-            :options="clientOptions"
-            optionLabel="name"
-            optionValue="id"
-            display="chip"
-            filter
-            placeholder="Клиент"
-            class="w-full md:w-80"
-          />
+          <MultiSelect id="clientFilter" v-model="selectedClients" :options="clientOptions" optionLabel="name"
+            optionValue="id" display="chip" filter placeholder="Клиент" class="select w-full md:w-80" />
         </div>
 
         <div class="filter-group">
-          <MultiSelect
-            id="resourceFilter"
-            v-model="selectedResources"
-            :options="resourceOptions"
-            optionLabel="name"
-            optionValue="id"
-            display="chip"
-            filter
-            placeholder="Ресурс"
-            class="w-full md:w-80"
-          />
+          <MultiSelect id="resourceFilter" v-model="selectedResources" :options="resourceOptions" optionLabel="name"
+            optionValue="id" display="chip" filter placeholder="Ресурс" class="select w-full md:w-80" />
         </div>
 
         <div class="filter-group">
-          <MultiSelect
-            id="unitFilter"
-            v-model="selectedUnits"
-            :options="unitOptions"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Единица измерения"
-            class="w-full md:w-80"
-            filter
-            display="chip"
-          />
+          <MultiSelect id="unitFilter" v-model="selectedUnits" :options="unitOptions" optionLabel="name"
+            optionValue="id" placeholder="Единица измерения" class="select w-full md:w-80" filter display="chip" />
         </div>
       </div>
       <div class="header-buttons">
-        <Button
-          label="Применить"
-          icon="pi pi-filter"
-          @click="applyFilters"
-          :disabled="loading"
-        />
-        <Button
-          label="Добавить"
-          icon="pi pi-plus"
-          @click="navigateToCreate"
-          :disabled="loading"
-        />
+        <Button label="Применить" icon="pi pi-filter" @click="applyFilters" :disabled="loading" />
+        <Button label="Добавить" icon="pi pi-plus" @click="navigateToCreate" :disabled="loading" />
         <ProgressSpinner v-if="loading" style="width: 30px; height: 30px" />
       </div>
     </div>
 
-    <DataTable
-      :value="shipments"
-      stripedRows
-      selectionMode="single"
-      @rowSelect="onRowSelect"
-      dataKey="id"
-      :loading="loading"
-      :paginator="true"
-      :rows="10"
-      :rowsPerPageOptions="[10, 20, 50]"
-      :totalRecords="totalRecords"
-    >
+    <DataTable :value="shipments" stripedRows showGridlines selectionMode="single" @rowSelect="onRowSelect" dataKey="id"
+      :loading="loading" :paginator="true" :rows="10" :rowsPerPageOptions="[10, 20, 50]" :totalRecords="totalRecords">
       <Column field="shipmentNumber" header="Номер" sortable></Column>
       <Column field="shipmentDate" header="Дата" sortable>
         <template #body="{ data }">
@@ -111,9 +56,13 @@
       </Column>
       <Column header="Клиент">
         <template #body="{ data }">
-          <div v-for="item in data.items" :key="item.clientId">
-            {{ item.clientName }}
-          </div>
+          {{ getClientName(data.clientId) }}
+        </template>
+      </Column>
+      <Column field="status" header="Статус" sortable>
+        <template #body="{ data }">
+          <Tag :value="data.status === 'Signed' ? 'Подписан' : 'Не подписан'"
+            :severity="data.status === 'Signed' ? 'success' : 'warning'" />
         </template>
       </Column>
       <Column header="Ресурс">
@@ -145,6 +94,7 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShipmentsStore } from '@/stores/shipments'
+import { useClientsStore } from '@/stores/clients'
 import { ShipmentFilter } from '@/types/shipments'
 import { FilterOption } from '@/types/filter'
 import { Pagination } from '@/types/pagination'
@@ -156,6 +106,7 @@ import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Calendar from 'primevue/calendar'
+import Tag from 'primevue/tag'
 import ProgressSpinner from 'primevue/progressspinner'
 
 export default defineComponent({
@@ -167,12 +118,20 @@ export default defineComponent({
     InputText,
     MultiSelect,
     Calendar,
+    Tag,
     ProgressSpinner
   },
   setup() {
     const router = useRouter()
     const shipmentsStore = useShipmentsStore()
+    const clientsStore = useClientsStore()
     const loading = ref(false)
+
+    onMounted(async () => {
+      await shipmentsStore.fetchShipments()
+      await clientsStore.fetchClients()
+    })
+
     const totalRecords = ref(0)
     const pagination = ref<Pagination>({
       page: 1,
@@ -192,6 +151,7 @@ export default defineComponent({
       const clients = new Map<string, FilterOption>()
       shipmentsStore.shipments.forEach(shipment => {
         if (!clients.has(shipment.clientId)) {
+          console.log(shipment.clientId, shipment.clientName)
           clients.set(shipment.clientId, {
             id: shipment.clientId,
             name: shipment.clientName
@@ -275,9 +235,19 @@ export default defineComponent({
       }
     }
 
-    onMounted(async () => {
-      await shipmentsStore.fetchShipments()
+    const clientNameMap = computed(() => {
+      const map = new Map<string, string>()
+      clientsStore.clients.forEach(client => {
+        map.set(client.id, client.clientName)
+      })
+      return map
     })
+
+    const getClientName = (clientId: string) => {
+      if (!clientId || !clientsStore.clients) return 'Unknown Client';
+      const client = clientsStore.clients.find(c => c.id === clientId);
+      return client?.clientName || clientId;
+    }
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString)
@@ -310,6 +280,7 @@ export default defineComponent({
       selectedClients,
       selectedResources,
       selectedUnits,
+      getClientName,
       formatDate,
       navigateToCreate,
       onRowSelect,

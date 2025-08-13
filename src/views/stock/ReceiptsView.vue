@@ -6,21 +6,13 @@
       <div class="filters">
         <div class="filter-group">
           <span class="p-float-label">
-            <Calendar
-              id="dateFilterFrom"
-              v-model="dateFrom"
-              dateFormat="dd.mm.yy"
-              showIcon
-            />
+            <Calendar id="dateFilterFrom" v-model="dateFrom" dateFormat="dd.mm.yy" showIcon />
             <label for="dateFilterFrom">От</label>
           </span>
+        </div>
+        <div class="filter-group">
           <span class="p-float-label">
-            <Calendar
-              id="dateFilterTo"
-              v-model="dateTo"
-              dateFormat="dd.mm.yy"
-              showIcon
-            />
+            <Calendar id="dateFilterTo" v-model="dateTo" dateFormat="dd.mm.yy" showIcon />
             <label for="dateFilterTo">До</label>
           </span>
         </div>
@@ -33,62 +25,24 @@
         </div>
 
         <div class="filter-group">
-          <MultiSelect
-            id="resourceFilter"
-            v-model="selectedResources"
-            :options="resourceOptions"
-            optionLabel="name"
-            optionValue="id"
-            display="chip"
-            filter
-            placeholder="Ресурс"
-            class="w-full md:w-80"
-          />
+          <MultiSelect id="resourceFilter" v-model="selectedResources" :options="resourceOptions" optionLabel="name"
+            optionValue="id" display="chip" filter placeholder="Ресурс" class="select w-full md:w-80" />
         </div>
 
         <div class="filter-group">
-          <MultiSelect
-            id="unitFilter"
-            v-model="selectedUnits"
-            :options="unitOptions"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Единица измерения"
-            class="w-full md:w-80"
-            filter
-            display="chip"
-          />
+          <MultiSelect id="unitFilter" v-model="selectedUnits" :options="unitOptions" optionLabel="name"
+            optionValue="id" placeholder="Единица измерения" class="select w-full md:w-80" filter display="chip" />
         </div>
       </div>
       <div class="header-buttons">
-        <Button
-          label="Применить"
-          icon="pi pi-filter"
-          @click="applyFilters"
-          :disabled="loading"
-        />
-        <Button
-          label="Добавить"
-          icon="pi pi-plus"
-          @click="navigateToCreate"
-          :disabled="loading"
-        />
+        <Button label="Применить" icon="pi pi-filter" @click="applyFilters" :disabled="loading" />
+        <Button label="Добавить" icon="pi pi-plus" @click="navigateToCreate" :disabled="loading" />
         <ProgressSpinner v-if="loading" style="width: 30px; height: 30px" />
       </div>
     </div>
 
-    <DataTable
-      :value="receipts"
-      stripedRows
-      selectionMode="single"
-      @rowSelect="onRowSelect"
-      dataKey="id"
-      :loading="loading"
-      :paginator="true"
-      :rows="10"
-      :rowsPerPageOptions="[10, 20, 50]"
-      :totalRecords="totalRecords"
-    >
+    <DataTable :value="receipts" stripedRows showGridlines  selectionMode="single" @rowSelect="onRowSelect" dataKey="id"
+      :loading="loading" :paginator="true" :rows="10" :rowsPerPageOptions="[10, 20, 50]" :totalRecords="totalRecords">
       <Column field="receiptNumber" header="Номер" sortable></Column>
       <Column field="receiptDate" header="Дата" sortable>
         <template #body="{ data }">
@@ -152,6 +106,7 @@ export default defineComponent({
     const router = useRouter()
     const receiptsStore = useReceiptsStore()
     const loading = ref(false)
+
     const totalRecords = ref(0)
     const pagination = ref<Pagination>({
       page: 1,
@@ -165,6 +120,17 @@ export default defineComponent({
     const number = ref<string>()
     const selectedResources = ref<string[]>([])
     const selectedUnits = ref<string[]>([])
+    const initialLoading = ref(true)
+
+    onMounted(async () => {
+      try {
+        await receiptsStore.fetchReceipts();
+      } catch (error) {
+        console.error('Error loading receipts:', error);
+      } finally {
+        initialLoading.value = false;
+      }
+    });
 
     const resourceOptions = computed<FilterOption[]>(() => {
       const resources = new Map<string, FilterOption>()
@@ -238,10 +204,6 @@ export default defineComponent({
         loading.value = false
       }
     }
-
-    onMounted(async () => {
-      await receiptsStore.fetchReceipts()
-    })
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString)

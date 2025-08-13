@@ -99,23 +99,23 @@ export const useShipmentsStore = defineStore("shipments", {
       }
 
       const payload = {
-        dto: {
-          ...updated,
-          shipmentDate: new Date(updated.shipmentDate).toISOString(),
-          items: updated.items.map((item) => ({
-            resourceId: item.resourceId,
-            unitId: item.unitId,
-            quantity: item.quantity,
-          })),
-        },
+        ...updated,
+        shipmentDate: new Date(updated.shipmentDate).toISOString(),
+        items: updated.items.map((item) => ({
+          resourceId: item.resourceId,
+          resourceName: item.resourceName,
+          unitId: item.unitId,
+          unitName: item.unitName,
+          quantity: item.quantity,
+        })),
       };
 
       const response = await fetch(
-        `${SHIPMENT_UPDATE_URL}/${updated.id || ""}`,
+        SHIPMENT_UPDATE_URL,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(updated),
         }
       );
 
@@ -124,7 +124,7 @@ export const useShipmentsStore = defineStore("shipments", {
         throw new Error(errorData.title || "Failed to update shipment");
       }
 
-      return await response.json();
+      return;
     },
     async remove(id: string) {
       await fetch(`${SHIPMENT_REMOVE_URL}/${id}`, {

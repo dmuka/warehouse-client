@@ -3,9 +3,18 @@
         <div class="page-header">
             <h1>{{ isEditMode ? 'Редактирование отгрузки' : 'Новая отгрузка' }}</h1>
             <div class="header-buttons">
-                <Button label="Сохранить" icon="pi pi-save" @click="saveShipment" />
-                <Button v-if="isEditMode" label="Удалить" icon="pi pi-times" class="p-button-secondary ml-2"
-                    @click="removeShipment" />
+                <Button v-if="!isEditMode" label="Добавить" icon="pi pi-save" @click="saveShipment(false)"
+                    class="p-button-secondary ml-2" />
+                <Button v-if="!isEditMode" label="Добавить и подписать" icon="pi pi-save" @click="saveShipment(true)"
+                    class="p-button-success" />
+                <Button v-if="isEditMode && shipment.status === 'Signed'" label="Отозвать" icon="pi pi-undo"
+                    @click="withdrawShipment" class="p-button-warning" />
+                <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Сохранить" icon="pi pi-save"
+                    @click="saveShipment(false)" class="p-button-secondary ml-2" />
+                <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Сохранить и подписать"
+                    icon="pi pi-save" @click="saveShipment(true)" class="p-button-success" />
+                <Button v-if="isEditMode && shipment.status !== 'Signed'" label="Удалить" icon="pi pi-trash"
+                    class="p-button-danger ml-2" @click="removeShipment" />
             </div>
         </div>
 
@@ -126,10 +135,11 @@ export default defineComponent({
             clientId: '',
             clientName: '',
             shipmentDate: new Date(),
+            status: 'Draft',
             items: [] as ShipmentItem[]
         })
 
-        const availableQuantities = ref<{[key: string]: number}>({})
+        const availableQuantities = ref<{ [key: string]: number }>({})
 
         const transformResource = (resource: Resource) => ({
             id: resource.id,
@@ -197,22 +207,16 @@ export default defineComponent({
         }
 
         const updateAvailableQuantity = async (index: number) => {
-            await nextTick()
-
-            const item = shipment.value.items[index]
+            const item = shipment.value.items[index];
 
             if (item.resourceId) {
-                const selectedResource = resourceOptions.value.find(r => r.id === item.resourceId)
-                if (selectedResource) {
-                    item.resourceName = selectedResource.name
-                }
+                const selectedResource = resourceOptions.value.find(r => r.id === item.resourceId);
+                if (selectedResource) item.resourceName = selectedResource.name;
             }
 
             if (item.unitId) {
-                const selectedUnit = unitOptions.value.find(u => u.id === item.unitId)
-                if (selectedUnit) {
-                    item.unitName = selectedUnit.name
-                }
+                const selectedUnit = unitOptions.value.find(u => u.id === item.unitId);
+                if (selectedUnit) item.unitName = selectedUnit.name;
             }
 
             if (item.resourceId && item.unitId) {
@@ -220,15 +224,15 @@ export default defineComponent({
                     const ids: BalanceByResourceAndUnit = {
                         resourceId: item.resourceId,
                         unitId: item.unitId
-                    }
-                    const available = await balancesStore.fetchBalanceByResourceAndUnit(ids)
-                    availableQuantities.value[`${index}`] = available || 0
+                    };
+                    const available = await balancesStore.fetchBalanceByResourceAndUnit(ids);
+                    availableQuantities.value[`${index}`] = available || 0;
                 } catch (error) {
-                    console.error('Error fetching available quantity:', error)
-                    availableQuantities.value[`${index}`] = 0
+                    console.error('Error fetching available quantity:', error);
+                    availableQuantities.value[`${index}`] = 0;
                 }
             } else {
-                availableQuantities.value[`${index}`] = 0
+                availableQuantities.value[`${index}`] = 0;
             }
         }
 
@@ -246,6 +250,7 @@ export default defineComponent({
         const addItem = () => {
             shipment.value.items.push({
                 id: '',
+                shipmentId: '',
                 resourceId: '',
                 resourceName: '',
                 unitId: '',
@@ -259,32 +264,55 @@ export default defineComponent({
             delete availableQuantities.value[`${index}`]
         }
 
-        const saveShipment = async () => {
+        const saveShipment = async (sign: boolean) => {
             try {
                 const payload: Shipment = {
-                    id: isEditMode.value ? shipment.value.id : undefined,
                     shipmentNumber: shipment.value.shipmentNumber,
-                    shipmentDate: shipment.value.shipmentDate,
                     clientId: shipment.value.clientId,
                     clientName: shipment.value.clientName,
-                    items: shipment.value.items.map(item => ({
-                        id: item.id,
-                        resourceId: item.resourceId,
-                        unitId: item.unitId,
-                        quantity: item.quantity,
-                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name || '',
-                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name || ''
-                    }))
+                    shipmentDate: shipment.value.shipmentDate instanceof Date
+                        ? shipment.value.shipmentDate.toISOString()
+                        : shipment.value.shipmentDate,
+                    status: sign ? 'Signed' : 'Draft',
+                    items: shipment.value.items
+                        .map(item => ({
+                            id: item.id,
+                            shipmentId: shipment.value.id,
+                            resourceId: item.resourceId,
+                            resourceName: item.resourceName,
+                            unitId: item.unitId,
+                            unitName: item.unitName,
+                            quantity: item.quantity
+                        } )) as ShipmentItem[]
                 };
 
+                console.log('Sending payload:', JSON.stringify(payload, null, 2)); // Debug log
+
                 if (isEditMode.value) {
-                    await shipmentsStore.update(payload);
+                    await shipmentsStore.update({
+                        id: shipment.value.id,
+                        ...payload
+                    });
                 } else {
                     await shipmentsStore.add(payload);
                 }
-                navigateBack()
+
+                navigateBack();
             } catch (error) {
                 console.error('Error saving shipment:', error);
+            }
+        }
+
+        const withdrawShipment = async () => {
+            try {
+                const payload: Shipment = {
+                    ...shipment.value,
+                    status: 'Draft'
+                };
+                await shipmentsStore.update(payload);
+                navigateBack()
+            } catch (error) {
+                console.error('Error withdrawing shipment:', error);
             }
         }
 
@@ -297,19 +325,6 @@ export default defineComponent({
             router.push(SHIPMENTS)
         }
 
-        watch(
-            () => shipment.value.items.map(item => ({
-                resourceId: item.resourceId,
-                unitId: item.unitId
-            })),
-            () => {
-                shipment.value.items.forEach((_, index) => {
-                    updateAvailableQuantity(index)
-                })
-            },
-            { deep: true }
-        )
-
         return {
             isEditMode,
             shipment,
@@ -319,6 +334,7 @@ export default defineComponent({
             addItem,
             removeItem,
             saveShipment,
+            withdrawShipment,
             removeShipment,
             updateClientName,
             updateAvailableQuantity,

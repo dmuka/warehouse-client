@@ -6,7 +6,8 @@
                     <h1>{{ title }}</h1>
                     <div class="header-buttons">
                         <Button label="Сохранить" icon="pi pi-save" @click="handleSubmit" />
-                        <Button v-if="showDeleteButton" label="Удалить" icon="pi pi-trash" severity="danger" @click="remove" />
+                        <Button v-if="showDeleteButton" label="Удалить" icon="pi pi-trash" severity="danger"
+                            @click="remove" />
                         <Button v-if="showArchiveButton" :label="isArchived ? 'В работу' : 'В архив'"
                             severity="secondary" icon="pi pi-tags" @click="isArchived ? unarchive() : archive()" />
                     </div>
@@ -95,8 +96,8 @@ export default defineComponent({
             if (isEditMode.value && id) {
                 const entity = await props.getFn(id)
                 if (entity) {
-                    form[props.formFieldName] = entity[props.formFieldName] || ''
-                    form[props.formFieldAddress] = entity[props.formFieldAddress] || ''
+                    form[props.formFieldName] = entity[props.formFieldName].value || ''
+                    form[props.formFieldAddress] = entity[props.formFieldAddress].value || ''
                     form.isActive = entity.isActive
                     isArchived.value = !entity.isActive
                 } else if (route.query[props.formFieldName]) {
@@ -111,21 +112,25 @@ export default defineComponent({
         const showArchiveButton = computed(() => isEditMode.value)
 
         const handleSubmit = async () => {
-            if (isEditMode.value && id) {
-                await props.updateFn({
-                    id: id,
-                    [props.formFieldName]: form[props.formFieldName],
-                    [props.formFieldAddress]: form[props.formFieldAddress],
-                    isActive: form.isActive
-                })
-            } else {
-                await props.addFn({
-                    [props.formFieldName]: form[props.formFieldName],
-                    [props.formFieldAddress]: form[props.formFieldAddress],
-                    isActive: true
-                })
+            try {
+                if (isEditMode.value && id) {
+                    await props.updateFn({
+                        id: id,
+                        [props.formFieldName]: form[props.formFieldName],
+                        [props.formFieldAddress]: form[props.formFieldAddress],
+                        isActive: form.isActive
+                    })
+                } else {
+                    await props.addFn({
+                        [props.formFieldName]: form[props.formFieldName],
+                        [props.formFieldAddress]: form[props.formFieldAddress],
+                        isActive: true
+                    })
+                }
+                navigateBack()
+            } catch (error) {
+                
             }
-            navigateBack()
         }
 
         const archive = async () => {

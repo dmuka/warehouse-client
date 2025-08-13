@@ -99,19 +99,19 @@ export const useReceiptsStore = defineStore("receipts", {
       }
 
       const payload = {
-        dto: {
           ...updated,
           receiptDate: new Date(updated.receiptDate).toISOString(),
           items: updated.items.map((item) => ({
             resourceId: item.resourceId,
+            resourceName: item.resourceName,
             unitId: item.unitId,
+            unitName: item.unitName,
             quantity: item.quantity,
-          })),
-        },
+          }))
       };
 
       const response = await fetch(
-        `${RECEIPT_UPDATE_URL}/${updated.id || ""}`,
+        RECEIPT_UPDATE_URL,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

@@ -14,6 +14,7 @@ export interface Shipment {
   clientId: string
   clientName: string
   shipmentDate: string | Date
+  status: 'Draft' | 'Signed';
   items: ShipmentItem[]
 }
 

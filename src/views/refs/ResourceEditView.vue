@@ -15,7 +15,7 @@
       <div class="form-section">
         <div class="form-row">
           <label class="form-label">Наименование</label>
-          <InputText id="name" v-model="form.resourceName" required />
+          <InputText id="name" v-model="form.resourceName.value" required />
         </div>
       </div>
     </template>

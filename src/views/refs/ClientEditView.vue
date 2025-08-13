@@ -9,8 +9,8 @@
     :archive-fn="clientsStore.archive"
     :unarchive-fn="clientsStore.unarchive"
     :remove-fn="clientsStore.remove"
-    form-field-name="clientName"
-    form-field-address="clientAddress"
+    formFieldName="clientName"
+    formFieldAddress="clientAddress"
   >
     <template #default="{ form }">
       <div class="form-section">

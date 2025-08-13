@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <DataTable :value="balances" stripedRows class="custom-table" :loading="loading" paginator :rows="10"
+    <DataTable :value="balances" stripedRows showGridlines class="custom-table" :loading="loading" paginator :rows="10"
         :rowsPerPageOptions="[5, 10, 20, 50]">
         <Column field="resourceName" header="Ресурс" sortable></Column>
         <Column field="unitName" header="Единица измерения" sortable></Column>
@@ -77,6 +77,11 @@ export default defineComponent({
   setup() {
     const balancesStore = useBalancesStore()
     const loading = ref(false)
+
+    onMounted(() => {
+      balancesStore.fetchAllBalances()
+    })
+
     const selectedResources = ref<string[]>([])
     const selectedUnits = ref<string[]>([])
 
@@ -125,10 +130,6 @@ export default defineComponent({
     const formatNumber = (value: number) => {
       return new Intl.NumberFormat('ru-RU').format(value)
     }
-
-    onMounted(() => {
-      balancesStore.fetchAllBalances()
-    })
 
     return {
       loading,

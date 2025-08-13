@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <DataTable :value="showArchive ? archivedItems : activeItems" stripedRows selectionMode="single"
+        <DataTable :value="showArchive ? archiveditems : activeitems" stripedRows selectionMode="single"
             @rowSelect="navigateToEdit" class="custom-table">
             <slot name="columns"></slot>
         </DataTable>
@@ -38,11 +38,11 @@ export default defineComponent({
             type: String,
             required: true
         },
-        activeItems: {
+        activeitems: {
             type: Array,
             required: true
         },
-        archivedItems: {
+        archiveditems: {
             type: Array,
             required: true
         },

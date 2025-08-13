@@ -3,7 +3,7 @@
     :archived-items="archivedResources" edit-route-prefix="/references/resources/edit"
     add-route="/references/resources/add">
     <template #columns>
-      <Column field="name" header="Наименование"></Column>
+      <Column field="Name" header="Наименование"></Column>
     </template>
   </RefsView>
 </template>
@@ -30,8 +30,8 @@ export default defineComponent({
 
     const transformResource = (resource: Resource) => ({
       ...resource,
-      id: resource.id,
-      name: resource.resourceName
+      Id: resource.id,
+      Name: resource.resourceName
     })
 
     const activeResources = computed(() => {

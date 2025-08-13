@@ -125,6 +125,9 @@
   display: flex;
   flex: 1;
   flex-direction: row;
+}
+
+.select {
   min-width: 250px;
 }
 
@@ -165,7 +168,7 @@
     width: 200px;
 }
 
-/* Special case for calendar */
 .form-input.p-calendar .p-inputtext {
     width: 100%;
 }
+
