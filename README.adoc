@@ -101,8 +101,8 @@ yarn -v  # Verify the installation
 +
 [source,bash]
 ----
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/dmuka/warehouse-client
+cd warehouse-client
 ----
 
 2. Create environment variables file:
