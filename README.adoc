@@ -1,7 +1,209 @@
-= Warehouse
+= Warehouse client
 dmuka; Dmitry Belousov
-:toc:
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: highlightjs
 
 image:https://img.shields.io/github/commit-activity/t/dmuka/warehouse-client[GitHub commits, alt="Commits Badge"]
 image:https://img.shields.io/github/commit-activity/m/dmuka/warehouse-client[GitHub commits, alt="Commits Badge"]
 image:https://img.shields.io/github/last-commit/dmuka/warehouse-client[GitHub last commit, alt="Last Commit Badge"]
+
+== Overview
+
+A comprehensive inventory management system built with Vue.js that allows tracking of stock balances, managing receipts and shipments, and maintaining reference data for resources, units, and clients.
+
+== Architecture
+
+=== System Architecture
+
+The application follows a Single-Page Application (SPA) architecture with a clear separation between the frontend and backend. The frontend communicates with the backend API through RESTful endpoints.
+
+=== Key Components
+
+* *Frontend*: Vue 3 with Composition API
+* *State Management*: Pinia
+* *UI Framework*: PrimeVue
+* *API Communication*: Axios
+* *Routing*: Vue Router
+* *Styling*: SCSS with modular architecture
+
+== Design Patterns
+
+=== Frontend Patterns
+
+* *Component-Based Architecture*: The UI is composed of reusable, isolated components (RefsView, RefEditView, etc.) that encapsulate their own logic and styling.
+
+* *Composition API Pattern*: Using Vue 3's Composition API for better code organization and reuse of logic across components.
+
+* *Store Pattern*: Implementing Pinia stores for centralized state management (balancesStore, receiptsStore, shipmentsStore, etc.).
+
+* *Service Layer Pattern*: API communication is abstracted through service modules (`api-client.ts` and `api/index.ts`).
+
+* *Repository Pattern*: Data access logic is encapsulated within store modules that provide methods for CRUD operations.
+
+* *Reactive Programming*: Using Vue's reactivity system with `ref`, `computed`, and `reactive` for reactive state management.
+
+* *Type-Driven Development*: Utilizing TypeScript interfaces for robust type checking across the application.
+
+=== Application Structure
+
+* *Views*: Page components representing entire screens
+* *Components*: Reusable UI components
+* *Stores*: Pinia stores for state management
+* *Services*: API communication layer
+* *Types*: TypeScript interfaces
+* *Router*: Navigation and routing configuration
+* *Styles*: SCSS modules using mixins and variables
+
+== Installation
+
+=== Prerequisites
+
+Before installing the application, ensure you have the following installed:
+
+* Node.js (v22.13.1)
+* Yarn
+* Git
+
+=== Environment Setup
+
+==== 1. Installing NVM (Node Version Manager)
+
+1. Download the NVM installer for Windows from the official repository.
+2. Run nvm-setup.exe and follow the installation instructions.
+
+==== 2. Installing Node.js version 22.13.1
+
+After installing NVM, install the required Node.js version. Open a command prompt with administrator privileges:
+
+[source,bash]
+----
+nvm install 22.13.1
+nvm list
+nvm use 22.13.1
+node -v  # Should display v22.13.1
+----
+
+==== 3. Installing Yarn
+
+Install Yarn using npm:
+
+[source,bash]
+----
+npm install -g yarn
+yarn -v  # Verify the installation
+----
+
+==== 4. Setting up the project
+
+1. Clone the repository:
++
+[source,bash]
+----
+git clone <repository-url>
+cd <repository-name>
+----
+
+2. Create environment variables file:
++
+[source,bash]
+----
+cp .env.example .env
+----
++
+Edit the `.env` file to configure your backend API URL:
++
+[source,properties]
+----
+VITE_API_URL=https://localhost:7078/api
+----
+
+==== 5. Running the Vue 3 project
+
+1. Create a project folder and open Visual Studio Code in this folder.
+2. Run `yarn install` (if you encounter an error, try `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first).
+3. Start the project with `yarn dev` and open it using the link provided in the console.
+
+=== Production Build
+
+To create a production build:
+
+[source,bash]
+----
+yarn build
+----
+
+=== Backend Setup
+
+This application requires a backend API service that provides endpoints for:
+
+* Balance management
+* Receipt operations
+* Shipment operations
+* Reference data (resources, units, clients)
+
+Ensure your backend implements the required API endpoints matching the frontend's expected data structures.
+
+== Key Dependencies
+
+=== Core Dependencies
+
+* *Vue 3*: Progressive JavaScript framework
+* *Pinia*: State management library
+* *Vue Router*: Official router for Vue.js
+* *TypeScript*: JavaScript with syntax for types
+* *Axios*: Promise-based HTTP client
+
+=== UI Components
+
+* *PrimeVue*: UI component library
+* *PrimeIcons*: Icon set for PrimeVue
+
+[source,json]
+----
+"dependencies": {
+  "vue": "^3.x",
+  "pinia": "^2.x",
+  "vue-router": "^4.x",
+  "axios": "^1.x",
+  "primevue": "^3.x",
+  "primeicons": "^6.x"
+}
+----
+
+== Application Features
+
+=== Stock Management
+
+* View current stock balances with filtering capabilities
+* Process receipts (incoming inventory)
+* Process shipments (outgoing inventory)
+
+=== Reference Data Management
+
+* Maintain resources catalog
+* Manage measurement units
+* Track clients
+
+=== User Interface
+
+* Responsive layout with sidebar navigation
+* Data tables with sorting and filtering
+* Form validation
+* Toast notifications
+
+== Configuration
+
+The application can be configured through environment variables:
+
+* `VITE_API_URL`: Backend API URL
+
+== Troubleshooting
+
+=== Common Issues
+
+* *API Connection Issues*: Check that the VITE_API_URL is correctly set in your .env file
+* *Build Errors*: Ensure all dependencies are installed with `yarn install`
+* *Type Errors*: Make sure TypeScript interfaces match the API response structure
+* *PowerShell Execution Policy*: If you encounter errors running scripts, try `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
