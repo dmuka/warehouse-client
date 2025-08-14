@@ -6,13 +6,13 @@
 
     <div class="filters">
       <div class="filter-group">
-        <MultiSelect id="resourceFilter" v-model="selectedResources" :options="resourceOptions" optionLabel="itemName"
-          optionValue="itemId" display="chip" filter placeholder="Выберите ресурсы" class="w-full md:w-80" />
+        <MultiSelect id="resourceFilter" v-model="selectedResources" :options="resourceOptions" optionLabel="name"
+          optionValue="id" display="chip" filter placeholder="Выберите ресурсы" class="w-full md:w-80" />
       </div>
 
       <div class="filter-group">
-        <MultiSelect id="unitFilter" v-model="selectedUnits" :options="unitOptions" optionLabel="itemName"
-          optionValue="itemId" placeholder="Выберите единицы" class="w-full md:w-80" filter display="chip"
+        <MultiSelect id="unitFilter" v-model="selectedUnits" :options="unitOptions" optionLabel="name"
+          optionValue="id" placeholder="Выберите единицы" class="w-full md:w-80" filter display="chip"
           panelClass="clean-panel" />
       </div>
 
@@ -70,8 +70,8 @@ export default defineComponent({
       balancesStore.balances.forEach(item => {
         if (!resources.has(item.resourceId)) {
           resources.set(item.resourceId, {
-            itemId: item.resourceId,
-            itemName: item.resourceName
+            id: item.resourceId,
+            name: item.resourceName
           })
         }
       })
@@ -83,8 +83,8 @@ export default defineComponent({
       balancesStore.balances.forEach(item => {
         if (!units.has(item.unitId)) {
           units.set(item.unitId, {
-            itemId: item.unitId,
-            itemName: item.unitName
+            id: item.unitId,
+            name: item.unitName
           })
         }
       })

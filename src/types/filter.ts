@@ -1,4 +1,4 @@
 export interface FilterOption {
-  itemId: string
-  itemName: string
+  id: string
+  name: string
 }

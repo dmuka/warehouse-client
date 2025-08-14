@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { BALANCES_URL, BALANCE_UPDATE_URL, BALANCE_FILTER_URL, BALANCE_AVAILABLE_URL } from '../api'
 import { Balance, BalanceByResourceAndUnit, BalanceFilter } from '@/types/balances'
+import api from '@/api/index'
 
 export const useBalancesStore = defineStore('balances', {
   state: () => ({
@@ -20,13 +21,8 @@ export const useBalancesStore = defineStore('balances', {
       try {
         this.isLoading = true
         this.error = null
-        const response = await fetch(BALANCES_URL)
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        this.balances = await response.json()
+        this.balances = await api.get(BALANCES_URL)
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to fetch balances'
         console.error('Error fetching balances:', err)
@@ -40,19 +36,7 @@ export const useBalancesStore = defineStore('balances', {
         this.isLoading = true
         this.error = null
 
-        const response = await fetch(BALANCE_AVAILABLE_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(ids)
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const balance = await response.json()
+        const balance = await api.post<BalanceByResourceAndUnit, number>(BALANCE_AVAILABLE_URL, ids)
 
         return balance
       } catch (err) {
@@ -67,20 +51,8 @@ export const useBalancesStore = defineStore('balances', {
       try {
         this.isLoading = true
         this.error = null
+        this.balances = await api.post(BALANCE_FILTER_URL, filter)
 
-        const response = await fetch(BALANCE_FILTER_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(filter)
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        this.balances = await response.json()
         return this.balances
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to fetch filtered balances'
@@ -95,20 +67,7 @@ export const useBalancesStore = defineStore('balances', {
       try {
         this.isLoading = true
         this.error = null
-
-        const response = await fetch(BALANCE_UPDATE_URL, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(balance)
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const updatedBalance = await response.json()
+        const updatedBalance = await api.put<Balance, Balance>(BALANCE_UPDATE_URL, balance)
 
         const index = this.balances.findIndex(b => b.id === updatedBalance.id)
         if (index !== -1) {

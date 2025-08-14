@@ -1,135 +1,97 @@
 import { defineStore } from 'pinia'
 import { Receipt, ReceiptFilter } from '@/types/receipts'
 import { RECEIPTS_URL, RECEIPT_UPDATE_URL, RECEIPT_REMOVE_URL, RECEIPT_FILTER_URL } from '../api'
+import api from '@/api/index'
 
 export const useReceiptsStore = defineStore("receipts", {
   state: () => ({
-    receipts: [] as Receipt[],
+    receipts: <Receipt[]>[],
     isLoading: false,
     error: null as string | null
   }),
   actions: {
     async fetchReceipts() {
       try {
-        const response = await fetch(RECEIPTS_URL);
-        if (!response.ok) throw new Error("Failed to fetch receipts");
-        const data = await response.json();
-        this.receipts = data;
+        this.receipts = await api.get(RECEIPTS_URL)
       } catch (error) {
-        console.error("Error loading receipts:", error);
+        this.error = error instanceof Error ? error.message : 'Failed to fetch receipts'
+        console.error("Error loading receipts:", error)
+        throw error
       }
     },
     async fetchFilteredReceipts(filter: ReceiptFilter) {
       try {
-        this.isLoading = true;
-        this.error = null;
+        this.isLoading = true
+        this.error = null
 
-        const response = await fetch(RECEIPT_FILTER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(filter),
-        });
+        this.receipts = await api.post<ReceiptFilter, Receipt[]>(RECEIPT_FILTER_URL, filter)
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        this.receipts = await response.json();
-        return this.receipts;
+        return this.receipts
       } catch (err) {
-        this.error =
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch filtered receipts";
-        console.error("Error fetching filtered receipts:", err);
-        throw err;
+        this.error = err instanceof Error ? err.message : 'Failed to fetch filtered receipts'
+        console.error("Error fetching filtered receipts:", err)
+        throw err
       } finally {
-        this.isLoading = false;
+        this.isLoading = false
       }
     },
     async getById(id: string) {
       try {
-        const response = await fetch(`${RECEIPTS_URL}/${id}`);
+        const data = await api.get<string, Receipt>(`${RECEIPTS_URL}/${id}`)
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(
-            errorData?.message ||
-              `Failed to fetch receipt: ${response.status} ${response.statusText}`
-          );
-        }
-
-        const data = await response.json();
-
-        const index = this.receipts.findIndex((r) => r.id === id);
+        const index = this.receipts.findIndex(r => r.id === id)
         if (index !== -1) {
-          this.receipts[index] = data;
+          this.receipts[index] = data
         } else {
-          this.receipts.push(data);
+          this.receipts.push(data)
         }
 
-        return data;
+        return data
       } catch (error) {
-        console.error(`Error loading receipt with ID ${id}:`, error);
-        throw error;
+        console.error(`Error loading receipt with ID ${id}:`, error)
+        throw error
       }
     },
 
     async add(receipt: Receipt) {
-      const response = await fetch(RECEIPTS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(receipt),
-      });
+      try {
+        const data = await api.post<string, Receipt>(RECEIPTS_URL, receipt)
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.title || "Failed to add receipt");
+        return data
+      } catch (error) {
+        console.error("Error adding receipt:", error)
+        throw error
       }
-
-      return await response.json();
     },
 
     async update(updated: Receipt) {
-      if (updated.id === "") {
-        const { id, ...rest } = updated;
-        updated = { id, ...rest };
-      }
-
-      const payload = {
+      try {
+        const payload = {
           ...updated,
           receiptDate: new Date(updated.receiptDate).toISOString(),
-          items: updated.items.map((item) => ({
+          items: updated.items.map(item => ({
             resourceId: item.resourceId,
             resourceName: item.resourceName,
             unitId: item.unitId,
             unitName: item.unitName,
             quantity: item.quantity,
           }))
-      };
-
-      const response = await fetch(
-        RECEIPT_UPDATE_URL,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.title || "Failed to update receipt");
+        const data = await api.put<string, Receipt>(RECEIPT_UPDATE_URL, payload)
+        return data
+      } catch (error) {
+        console.error("Error updating receipt:", error)
+        throw error
       }
-
-      return await response.json();
     },
     async remove(id: string) {
-      await fetch(`${RECEIPT_REMOVE_URL}/${id}`, {
-        method: "DELETE",
-      });
+      try {
+        await api.delete<string>(`${RECEIPT_REMOVE_URL}/${id}`)
+      } catch (error) {
+        console.error("Error removing receipt:", error)
+        throw error
+      }
     },
   },
 });

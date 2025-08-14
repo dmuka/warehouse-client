@@ -11,8 +11,8 @@
           <ul>
             <li v-for="route in stockRoutes" :key="route.path">
               <router-link :to="route.path">
-                <i :class="route.meta.icon"></i>
-                <span>{{ route.meta.title }}</span>
+                <i :class="route.meta?.icon"></i>
+                <span>{{ route.meta?.title }}</span>
               </router-link>
             </li>
           </ul>
@@ -23,8 +23,8 @@
           <ul>
             <li v-for="route in referenceRoutes" :key="route.path">
               <router-link :to="route.path">
-                <i :class="route.meta.icon"></i>
-                <span>{{ route.meta.title }}</span>
+                <i :class="route.meta?.icon"></i>
+                <span>{{ route.meta?.title }}</span>
               </router-link>
             </li>
           </ul>
