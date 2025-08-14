@@ -12,7 +12,9 @@ export const useReceiptsStore = defineStore("receipts", {
   actions: {
     async fetchReceipts() {
       try {
-        this.receipts = await api.get(RECEIPTS_URL)
+        const response = await api.get(RECEIPTS_URL)
+
+        this.receipts = response.data
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Failed to fetch receipts'
         console.error("Error loading receipts:", error)
@@ -24,7 +26,9 @@ export const useReceiptsStore = defineStore("receipts", {
         this.isLoading = true
         this.error = null
 
-        this.receipts = await api.post<ReceiptFilter, Receipt[]>(RECEIPT_FILTER_URL, filter)
+        const response = await api.post<Receipt[]>(RECEIPT_FILTER_URL, filter)
+
+        this.receipts = response.data
 
         return this.receipts
       } catch (err) {
@@ -37,16 +41,16 @@ export const useReceiptsStore = defineStore("receipts", {
     },
     async getById(id: string) {
       try {
-        const data = await api.get<string, Receipt>(`${RECEIPTS_URL}/${id}`)
+        const response = await api.get<Receipt>(`${RECEIPTS_URL}/${id}`)
 
         const index = this.receipts.findIndex(r => r.id === id)
         if (index !== -1) {
-          this.receipts[index] = data
+          this.receipts[index] = response.data
         } else {
-          this.receipts.push(data)
+          this.receipts.push(response.data)
         }
 
-        return data
+        return response.data
       } catch (error) {
         console.error(`Error loading receipt with ID ${id}:`, error)
         throw error
@@ -55,9 +59,9 @@ export const useReceiptsStore = defineStore("receipts", {
 
     async add(receipt: Receipt) {
       try {
-        const data = await api.post<string, Receipt>(RECEIPTS_URL, receipt)
+        const response = await api.post<Receipt>(RECEIPTS_URL, receipt)
 
-        return data
+        return response.data
       } catch (error) {
         console.error("Error adding receipt:", error)
         throw error
@@ -78,8 +82,8 @@ export const useReceiptsStore = defineStore("receipts", {
           }))
         }
 
-        const data = await api.put<string, Receipt>(RECEIPT_UPDATE_URL, payload)
-        return data
+        const response = await api.put<Receipt>(RECEIPT_UPDATE_URL, payload)
+        return response.data
       } catch (error) {
         console.error("Error updating receipt:", error)
         throw error
@@ -87,7 +91,7 @@ export const useReceiptsStore = defineStore("receipts", {
     },
     async remove(id: string) {
       try {
-        await api.delete<string>(`${RECEIPT_REMOVE_URL}/${id}`)
+        await api.delete(`${RECEIPT_REMOVE_URL}/${id}`)
       } catch (error) {
         console.error("Error removing receipt:", error)
         throw error

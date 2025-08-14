@@ -3,7 +3,7 @@
     :archived-items="archivedUnits"
     edit-route-prefix="/references/units/edit" add-route="/references/units/add">
     <template #columns>
-      <Column field="name" header="Наименование"></Column>
+      <Column field="unitName" header="Наименование"></Column>
     </template>
   </RefsView>
 </template>
@@ -11,7 +11,6 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted } from 'vue'
 import { useUnitsStore } from '@/stores/units'
-import { Unit } from '@/types/units'
 import RefsView from '@/components/RefsView.vue'
 import Column from 'primevue/column'
 
@@ -25,23 +24,15 @@ export default defineComponent({
     const unitsStore = useUnitsStore()
 
     onMounted(() => {
-      unitsStore.fetchUnits()
-    })
-
-    const transformUnit = (unit: Unit) => ({
-      ...unit,
-      id: unit.id,
-      name: unit.unitName
+      unitsStore.fetchAll()
     })
 
     const activeUnits = computed(() => {
-      return (unitsStore.units?.filter(item => item.isActive) || [])
-        .map(transformUnit)
+      return (unitsStore.items?.filter(item => item.isActive) || [])
     })
 
     const archivedUnits = computed(() => {
-      return (unitsStore.units?.filter(item => !item.isActive) || [])
-        .map(transformUnit)
+      return (unitsStore.items?.filter(item => !item.isActive) || [])
     })
 
     return {

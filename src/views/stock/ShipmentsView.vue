@@ -129,7 +129,7 @@ export default defineComponent({
 
     onMounted(async () => {
       await shipmentsStore.fetchShipments()
-      await clientsStore.fetchClients()
+      await clientsStore.fetchAll()
     })
 
     const totalRecords = ref(0)
@@ -235,17 +235,9 @@ export default defineComponent({
       }
     }
 
-    const clientNameMap = computed(() => {
-      const map = new Map<string, string>()
-      clientsStore.clients.forEach(client => {
-        map.set(client.id, client.clientName)
-      })
-      return map
-    })
-
     const getClientName = (clientId: string) => {
-      if (!clientId || !clientsStore.clients) return 'Unknown Client';
-      const client = clientsStore.clients.find(c => c.id === clientId);
+      if (!clientId || !clientsStore.items) return 'Unknown Client';
+      const client = clientsStore.items.find(c => c.id === clientId);
       return client?.clientName || clientId;
     }
 

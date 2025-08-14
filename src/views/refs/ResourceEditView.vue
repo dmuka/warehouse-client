@@ -2,13 +2,13 @@
   <RefEditView
     title="Ресурс"
     :list-route="'/references/resources'"
-    :fetch-fn="resourcesStore.fetchResources"
+    :fetch-fn="resourcesStore.fetchAll"
     :get-fn="resourcesStore.getById"
     :update-fn="resourcesStore.update"
-    :add-fn="resourcesStore.add"
+    :add-fn="resourcesStore.create"
     :archive-fn="resourcesStore.archive"
     :unarchive-fn="resourcesStore.unarchive"
-    :remove-fn="resourcesStore.remove"
+    :remove-fn="resourcesStore.delete"
     form-field-name="resourceName"
   >
     <template #default="{ form }">

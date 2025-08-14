@@ -23,7 +23,7 @@
 
             <div class="form-row">
                 <label class="form-label">Клиент</label>
-                <Dropdown v-model="shipment.clientId" :options="clientOptions" optionLabel="name" optionValue="id"
+                <Dropdown v-model="shipment.clientId" :options="clientOptions" optionLabel="clientName" optionValue="id"
                     placeholder="Выберите клиента" @change="updateClientName" />
             </div>
 
@@ -51,13 +51,13 @@
                 <Column field="resource" header="Ресурс">
                     <template #body="{ data, index }">
                         <Dropdown v-model="shipment.items[index].resourceId" :options="resourceOptions"
-                            optionLabel="name" optionValue="id" placeholder="Выберите ресурс"
+                            optionLabel="resourceName" optionValue="id" placeholder="Выберите ресурс"
                             @change="updateAvailableQuantity(index)" />
                     </template>
                 </Column>
                 <Column field="unit" header="Единица измерения">
                     <template #body="{ data, index }">
-                        <Dropdown v-model="shipment.items[index].unitId" :options="unitOptions" optionLabel="name"
+                        <Dropdown v-model="shipment.items[index].unitId" :options="unitOptions" optionLabel="unitName"
                             optionValue="id" placeholder="Выберите единицу" @change="updateAvailableQuantity(index)" />
                     </template>
                 </Column>
@@ -87,9 +87,6 @@ import { useClientsStore } from '@/stores/clients'
 import { useBalancesStore } from '@/stores/balances'
 import { Shipment, ShipmentItem, ShipmentItemRequest, ShipmentRequest } from '@/types/shipments'
 import { BalanceByResourceAndUnit } from '@/types/balances'
-import { Resource } from '@/types/resources'
-import { Unit } from '@/types/units'
-import { Client } from '@/types/clients'
 import { SHIPMENTS } from '@/router/routes'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -138,42 +135,24 @@ export default defineComponent({
 
         const availableQuantities = ref<{ [key: string]: number }>({})
 
-        const transformResource = (resource: Resource) => ({
-            id: resource.id,
-            name: resource.resourceName,
-            isActive: resource.isActive
-        })
-
-        const transformUnit = (unit: Unit) => ({
-            id: unit.id,
-            name: unit.unitName,
-            isActive: unit.isActive
-        })
-
-        const transformClient = (client: Client) => ({
-            id: client.id,
-            name: client.clientName,
-            isActive: client.isActive
-        })
-
         const resourceOptions = computed(() => {
-            return resourcesStore.resources.map(transformResource)
+            return resourcesStore.items
         })
 
         const unitOptions = computed(() => {
-            return unitsStore.units.map(transformUnit)
+            return unitsStore.items
         })
 
         const clientOptions = computed(() => {
-            return clientsStore.clients.map(transformClient)
+            return clientsStore.items
         })
 
         onMounted(async () => {
             try {
                 await Promise.all([
-                    resourcesStore.fetchResources(),
-                    unitsStore.fetchUnits(),
-                    clientsStore.fetchClients()
+                    resourcesStore.fetchAll(),
+                    unitsStore.fetchAll(),
+                    clientsStore.fetchAll()
                 ])
 
                 if (isEditMode.value) {
@@ -199,7 +178,7 @@ export default defineComponent({
         const updateClientName = () => {
             const selectedClient = clientOptions.value.find(c => c.id === shipment.value.clientId)
             if (selectedClient) {
-                shipment.value.clientName = selectedClient.name
+                shipment.value.clientName = selectedClient.clientName
             }
         }
 
@@ -208,12 +187,12 @@ export default defineComponent({
 
             if (item.resourceId) {
                 const selectedResource = resourceOptions.value.find(r => r.id === item.resourceId);
-                if (selectedResource) item.resourceName = selectedResource.name;
+                if (selectedResource) item.resourceName = selectedResource.resourceName;
             }
 
             if (item.unitId) {
                 const selectedUnit = unitOptions.value.find(u => u.id === item.unitId);
-                if (selectedUnit) item.unitName = selectedUnit.name;
+                if (selectedUnit) item.unitName = selectedUnit.unitName;
             }
 
             if (item.resourceId && item.unitId) {

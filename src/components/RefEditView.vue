@@ -85,6 +85,7 @@ export default defineComponent({
 
         const form = reactive({
             [props.formFieldName]: '',
+            [props.formFieldAddress]: '',
             isActive: true
         })
 

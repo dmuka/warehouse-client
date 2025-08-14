@@ -2,8 +2,8 @@
   <RefsView active-title="Клиенты" archive-title="Архив клиентов" :active-items="activeClients"
     :archived-items="archivedClients" edit-route-prefix="/references/clients/edit" add-route="/references/clients/add">
     <template #columns>
-      <Column field="name" header="Наименование"></Column>
-      <Column field="address" header="Адрес"></Column>
+      <Column field="clientName" header="Наименование"></Column>
+      <Column field="clientAddress" header="Адрес"></Column>
     </template>
   </RefsView>
 </template>
@@ -23,25 +23,16 @@ export default defineComponent({
   setup() {
     const clientsStore = useClientsStore()
 
-    const transformClient = (client: any) => ({
-      ...client,
-      id: client.id,
-      name: client.clientName,
-      address: client.clientAddress
-    })
-
     const activeClients = computed(() => {
-      return (clientsStore.clients?.filter(item => item.isActive) || [])
-        .map(transformClient)
+      return (clientsStore.items?.filter(item => item.isActive) || [])
     })
 
     const archivedClients = computed(() => {
-      return (clientsStore.clients?.filter(item => !item.isActive) || [])
-        .map(transformClient)
+      return (clientsStore.items?.filter(item => !item.isActive) || [])
     })
 
     onMounted(() => {
-      clientsStore.fetchClients()
+      clientsStore.fetchAll()
     })
 
     return {

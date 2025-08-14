@@ -2,20 +2,20 @@
   <RefEditView
     title="Единица измерения"
     :list-route="'/references/units'"
-    :fetch-fn="unitsStore.fetchUnits"
+    :fetch-fn="unitsStore.fetchAll"
     :get-fn="unitsStore.getById"
     :update-fn="unitsStore.update"
-    :add-fn="unitsStore.add"
+    :add-fn="unitsStore.create"
     :archive-fn="unitsStore.archive"
     :unarchive-fn="unitsStore.unarchive"
-    :remove-fn="unitsStore.remove"
+    :remove-fn="unitsStore.delete"
     form-field-name="unitName"
   >
     <template #default="{ form }">
       <div class="form-section">
         <div class="form-row">
           <label class="form-label">Наименование</label>
-          <InputText id="Name" v-model="form.unitName" required />
+          <InputText id="name" v-model="form.unitName" required />
         </div>
       </div>
     </template>

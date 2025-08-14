@@ -2,13 +2,13 @@
   <RefEditView
     title="Клиент"
     :list-route="'/references/clients'"
-    :fetch-fn="clientsStore.fetchClients"
+    :fetch-fn="clientsStore.fetchAll"
     :get-fn="clientsStore.getById"
     :update-fn="clientsStore.update"
-    :add-fn="clientsStore.add"
+    :add-fn="clientsStore.create"
     :archive-fn="clientsStore.archive"
     :unarchive-fn="clientsStore.unarchive"
-    :remove-fn="clientsStore.remove"
+    :remove-fn="clientsStore.delete"
     formFieldName="clientName"
     formFieldAddress="clientAddress"
   >

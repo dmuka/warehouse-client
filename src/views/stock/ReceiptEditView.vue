@@ -39,12 +39,12 @@
                 <Column field="resource" header="Ресурс">
                     <template #body="{ data, index }">
                         <Dropdown v-model="receipt.items[index].resourceId" :options="resourceOptions"
-                            optionLabel="name" optionValue="id" placeholder="Выберите ресурс" />
+                            optionLabel="resourceName" optionValue="id" placeholder="Выберите ресурс" />
                     </template>
                 </Column>
                 <Column field="unit" header="Единица измерения">
                     <template #body="{ data, index }">
-                        <Dropdown v-model="receipt.items[index].unitId" :options="unitOptions" optionLabel="name"
+                        <Dropdown v-model="receipt.items[index].unitId" :options="unitOptions" optionLabel="unitName"
                             optionValue="id" placeholder="Выберите единицу" />
                     </template>
                 </Column>
@@ -65,8 +65,6 @@ import { useReceiptsStore } from '@/stores/receipts'
 import { useResourcesStore } from '@/stores/resources'
 import { useUnitsStore } from '@/stores/units'
 import { Receipt, ReceiptItem } from '@/types/receipts'
-import { Resource } from '@/types/resources'
-import { Unit } from '@/types/units'
 import { RECEIPTS } from '@/router/routes'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -108,35 +106,21 @@ export default defineComponent({
             items: [] as ReceiptItem[]
         })
 
-        const transformResource = (resource: Resource) => ({
-            id: resource.id,
-            name: resource.resourceName,
-            isActive: resource.isActive
-        })
-
-        const transformUnit = (unit: Unit) => ({
-            id: unit.id,
-            name: unit.unitName,
-            isActive: unit.isActive
-        })
-
         const resourceOptions = computed(() => {
-            return resourcesStore.resources
+            return resourcesStore.items
                 .filter(resource => resource.isActive)
-                .map(transformResource)
         })
 
         const unitOptions = computed(() => {
-            return unitsStore.units
+            return unitsStore.items
                 .filter(unit => unit.isActive)
-                .map(transformUnit)
         })
 
         onMounted(async () => {
             try {
                 await Promise.all([
-                    resourcesStore.fetchResources(),
-                    unitsStore.fetchUnits()
+                    resourcesStore.fetchAll(),
+                    unitsStore.fetchAll()
                 ])
 
                 if (isEditMode.value) {
@@ -181,8 +165,8 @@ export default defineComponent({
                         resourceId: item.resourceId,
                         unitId: item.unitId,
                         quantity: item.quantity,
-                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.name || '',
-                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.name || ''
+                        resourceName: resourceOptions.value.find(r => r.id === item.resourceId)?.resourceName || '',
+                        unitName: unitOptions.value.find(u => u.id === item.unitId)?.unitName || ''
                     }))
                 };
 
