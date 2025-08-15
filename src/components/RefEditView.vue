@@ -25,7 +25,8 @@
 <script lang="ts">
 import { defineComponent, reactive, computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useToast } from 'primevue/usetoast'
+//import { useToast } from 'primevue/usetoast'
+import { useToast } from '@/services/toastService'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 
@@ -123,9 +124,14 @@ export default defineComponent({
                             [props.formFieldAddress]: form[props.formFieldAddress],
                             isActive: form.isActive
                         })
-                        showSuccessToast('Updated')
+                        toast.success('Обновлено')
                     }
                     catch (error) {
+                        toast.error('Ошибка при обновлении', {
+                            life: 8000,
+                            detail: error,
+                            closable: true
+                        });
                     }
                 } else {
                     try {
@@ -134,9 +140,14 @@ export default defineComponent({
                             [props.formFieldAddress]: form[props.formFieldAddress],
                             isActive: true
                         })
-                        showSuccessToast('Added')
+                        toast.success('Добавлено')
                     }
                     catch (error) {
+                        toast.error('Ошибка при добавлении', {
+                            life: 8000,
+                            detail: error,
+                            closable: true
+                        });
                     }
                 }
                 navigateBack()
@@ -150,7 +161,7 @@ export default defineComponent({
                 await props.archiveFn(id)
                 form.isActive = false
                 isArchived.value = true
-                showSuccessToast('Archived')
+                toast.success('Добавлено в архив')
                 navigateBack()
             }
         }
@@ -160,7 +171,7 @@ export default defineComponent({
                 await props.unarchiveFn(id)
                 form.isActive = true
                 isArchived.value = false
-                showSuccessToast('Unarchived')
+                toast.success('Возвращено из архива')
                 navigateBack()
             }
         }
@@ -168,7 +179,7 @@ export default defineComponent({
         const remove = async () => {
             if (id) {
                 await props.removeFn(id)
-                showSuccessToast('Removed')
+                toast.success('Удалено')
                 navigateBack()
             }
         }
@@ -178,14 +189,14 @@ export default defineComponent({
             router.push(props.listRoute)
         }
 
-        const showSuccessToast = (detail: string) => {
-            toast.add({
-                severity: 'success',
-                summary: 'Успешно',
-                detail,
-                life: 3000
-            })
-        }
+        // const showSuccessToast = (detail: string) => {
+        //     toast.add({
+        //         severity: 'success',
+        //         summary: 'Успешно',
+        //         detail,
+        //         life: 3000
+        //     })
+        // }
 
         return {
             form,
@@ -198,7 +209,6 @@ export default defineComponent({
             archive,
             unarchive,
             remove,
-            showSuccessToast,
             navigateBack
         }
     }
